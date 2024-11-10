@@ -1,2 +1,3 @@
 # MWQ_Translate
-A simple pascal translate framework.
+A simple Pascal translate framework.
+Now add support LibreTranslate, and DeepL translate service. 
