@@ -1,4 +1,4 @@
-unit MWQ.Translate.Api.DeepLX;
+unit MWQ.Translate.Api.DeepLXTranslateService;
 
 interface
 

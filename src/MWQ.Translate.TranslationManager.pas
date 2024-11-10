@@ -25,7 +25,7 @@ type
 implementation
 
 uses
-  MWQ.Translate.Api.LibreTranslateService, MWQ.Translate.Api.DeepLX,
+  MWQ.Translate.Api.LibreTranslateService, MWQ.Translate.Api.DeepLXTranslateService,
   MwQ.Translate.Api.MicrosoftTranslateService;
 
 { TTranslationManager }
