@@ -36,6 +36,7 @@ contains
   MWQ.Translate.Api.LibreTranslateService in 'src\MWQ.Translate.Api.LibreTranslateService.pas',
   MWQ.Translate.Api.MicrosoftTranslateService in 'src\MWQ.Translate.Api.MicrosoftTranslateService.pas',
   MWQ.Translate.Types in 'src\MWQ.Translate.Types.pas',
-  MWQ.Translate.Api.BaseTranslationService in 'src\MWQ.Translate.Api.BaseTranslationService.pas';
+  MWQ.Translate.Api.BaseTranslationService in 'src\MWQ.Translate.Api.BaseTranslationService.pas',
+  MWQ.Translate.Api.DeepLX in 'src\MWQ.Translate.Api.DeepLX.pas';
 
 end.

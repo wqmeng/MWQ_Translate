@@ -86,6 +86,7 @@
         <DCCReference Include="src\MWQ.Translate.Api.MicrosoftTranslateService.pas"/>
         <DCCReference Include="src\MWQ.Translate.Types.pas"/>
         <DCCReference Include="src\MWQ.Translate.Api.BaseTranslationService.pas"/>
+        <DCCReference Include="src\MWQ.Translate.Api.DeepLX.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

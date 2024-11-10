@@ -14,14 +14,19 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure RegisterService(const AServiceName: string; AService: ITranslationService);
-    function Translate(const AServiceName, AText, ASourceLang, ADestLang: string): string;
+    function RegisterService(const AService: TTranslationService; const AApiKey: string): ITranslationService;
+    function TranslateByName(const AServiceName, AText, ASourceLangName, ADestLangName: string): string;
+    function TranslateByCode(const AServiceName, AText, ASourceLangCode, ADestLangCode: string): string;
     function GetRegisteredServices: TStringList;
     function GetTranslateService(const AServiceName: string): ITranslationService;
     function IsServiceRegistered(AService: TTranslationService): Boolean;
   end;
 
 implementation
+
+uses
+  MWQ.Translate.Api.LibreTranslateService, MWQ.Translate.Api.DeepLX,
+  MwQ.Translate.Api.MicrosoftTranslateService;
 
 { TTranslationManager }
 
@@ -70,17 +75,42 @@ begin
   Result := FServices.ContainsKey(ServiceName); // Check if the service is registered
 end;
 
-procedure TTranslationManager.RegisterService(const AServiceName: string; AService: ITranslationService);
+function TTranslationManager.RegisterService(const AService: TTranslationService; const AApiKey: string): ITranslationService;
 begin
-  FServices.Add(AServiceName, AService);
+  if not FServices.ContainsKey(TranslationServiceNames[AService]) then begin
+    case AService of
+      tsMicrosoftTranslate:
+        Result := TMicrosoftTranslateService.create(AApiKey);
+      tsGoogleTranslate, tsAmazonTranslate:
+        raise Exception.Create('Not implement. ' + TranslationServiceNames[AService]);
+      tsLibreTranslate:
+        Result := TLibreTranslateService.create;
+      tsDeepLXTranslate:
+        Result := TDeepLXService.create;
+    end;
+    if Result <> nil then
+      FServices.Add(TranslationServiceNames[AService], Result);
+  end else
+    Result := FServices[TranslationServiceNames[AService]];
 end;
 
-function TTranslationManager.Translate(const AServiceName, AText, ASourceLang, ADestLang: string): string;
+function TTranslationManager.TranslateByCode(const AServiceName, AText,
+  ASourceLangCode, ADestLangCode: string): string;
 var
   Service: ITranslationService;
 begin
   if FServices.TryGetValue(AServiceName, Service) then
-    Result := Service.Translate(AText, ASourceLang, ADestLang)
+    Result := Service.Translate(AText, ASourceLangCode, ADestLangCode)
+  else
+    raise Exception.Create('Translation service not found: ' + AServiceName);
+end;
+
+function TTranslationManager.TranslateByName(const AServiceName, AText, ASourceLangName, ADestLangName: string): string;
+var
+  Service: ITranslationService;
+begin
+  if FServices.TryGetValue(AServiceName, Service) then
+    Result := Service.Translate(AText, Service.LanguageNameToCode(ASourceLangName), Service.LanguageNameToCode(ADestLangName))
   else
     raise Exception.Create('Translation service not found: ' + AServiceName);
 end;

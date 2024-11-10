@@ -9,18 +9,18 @@ uses
 type
   TMicrosoftTranslateService = class(TBaseTranslationService, ITranslationService)
   private
-    FSubscriptionKey: string;
-    const
-      BASE_URL = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
+
   protected
     procedure InitializeLanguageMappings; override;
+    procedure SetBaseURL; override;
   public
     constructor Create(const ASubscriptionKey: string);
     destructor Destroy; override;
 
-    function Translate(const AText, ASourceLang, ADestLang: string): string;
-    function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean;
-    function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean;
+    function Translate(const AText, ASourceLang, ADestLang: string): string; override;
+    function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
+    function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
+    function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string): TArray<string>; override;
   end;
 
 implementation
@@ -30,19 +30,19 @@ implementation
 function TMicrosoftTranslateService.AddTranslator(const ATransApiUrl,
   AApiKey: string): Boolean;
 begin
-
+  Result := false;
 end;
 
 constructor TMicrosoftTranslateService.Create(const ASubscriptionKey: string);
 begin
   Inherited Create;
-  FSubscriptionKey := ASubscriptionKey;
+  FAPIKEY := ASubscriptionKey;
 end;
 
 function TMicrosoftTranslateService.DelTranslator(const ATransApiUrl,
   AApiKey: string): Boolean;
 begin
-
+  Result := true;
 end;
 
 destructor TMicrosoftTranslateService.Destroy;
@@ -56,6 +56,12 @@ begin
 //  FLanguageNamesToCodes.Items['Chinese (Literary)'] := 'zh-hs';
 //  FLanguageNamesToCodes.Items['Chinese Simplified'] := 'zh-hs';
 //  FLanguageNamesToCodes['Chinese Traditional'] := 'zh-ts';
+end;
+
+procedure TMicrosoftTranslateService.SetBaseURL;
+begin
+  inherited;
+  FBASE_URL := 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
 end;
 
 function TMicrosoftTranslateService.Translate(const AText, ASourceLang, ADestLang: string): string;
@@ -80,12 +86,12 @@ begin
 
       // Make the POST request
       LResponse := FHttpClient.Post(
-        BASE_URL + '&from=' + ASourceLang + '&to=' + ADestLang,
+        FBASE_URL + '&from=' + ASourceLang + '&to=' + ADestLang,
         LRequestBody,
         nil,
         [
           TNetHeader.Create('Content-Type', 'application/json'),
-          TNetHeader.Create('Ocp-Apim-Subscription-Key', FSubscriptionKey)
+          TNetHeader.Create('Ocp-Apim-Subscription-Key', FAPIKEY)
         ]
       );
 
@@ -112,6 +118,14 @@ begin
   finally
     LRequestBody.Free;
   end;
+end;
+
+function TMicrosoftTranslateService.TranslateBatch(const ATexts: TArray<string>;
+  const ASourceLang, ADestLang: string): TArray<string>;
+begin
+  raise Exception.Create('Not implement.');
+
+  Result := [];
 end;
 
 end.

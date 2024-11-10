@@ -16,6 +16,7 @@ type
     function GetSupportedLanguages: TDictionary<string, string>;
     function SupportBatchTranslations: Boolean;
     function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string): TArray<string>;
+    function DelDefaultBaseTranslator: Boolean;
   end;
 
 implementation

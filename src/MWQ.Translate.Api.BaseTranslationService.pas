@@ -11,11 +11,16 @@ type
   TBaseTranslationService = class(TInterfacedObject, ITranslationService)
 
   protected
+
+    FBASE_URL : string;
+    FAPIKEY: string;
+
     FHttpClient: THttpClient;
     FTranslators: TDictionary<string, TList<string>>;
     FLanguageNamesToCodes: TDictionary<string, string>;
     FLanguageCodesToNames: TDictionary<string, string>;
     procedure InitializeLanguageMappings; virtual;
+    procedure SetBaseURL; virtual; abstract;
   public
     constructor Create;
     destructor Destroy; override;
@@ -28,18 +33,37 @@ type
     function LanguageCodeToName(const ACode: string): string;
     function SupportBatchTranslations: Boolean; virtual;
     function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string): TArray<string>; virtual; abstract;
+    function DelDefaultBaseTranslator: Boolean; virtual;
+
+    property ApiKey: string read FAPIKEY write FAPIKEY;
+
   end;
 
 implementation
 
 constructor TBaseTranslationService.Create;
+var
+  DefaultApiKeys: TList<string>;
 begin
+  FBASE_URL := '';
+  FAPIKEY := '';
+  SetBaseURL;
   FHttpClient := THttpClient.Create;
   FTranslators := TDictionary<string, TList<string>>.Create;
   FLanguageNamesToCodes := TDictionary<string, string>.Create;
   FLanguageCodesToNames := TDictionary<string, string>.Create;
 
   InitializeLanguageMappings;
+
+  // Initialize default translator with an empty API key
+  DefaultApiKeys := TList<string>.Create;
+  DefaultApiKeys.Add(''); // Add empty API key
+  FTranslators.Add(FBASE_URL, DefaultApiKeys);
+end;
+
+function TBaseTranslationService.DelDefaultBaseTranslator: Boolean;
+begin
+  Result := DelTranslator(Self.FBASE_URL, FAPIKEY);
 end;
 
 destructor TBaseTranslationService.Destroy;

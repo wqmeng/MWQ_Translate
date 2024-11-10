@@ -9,20 +9,19 @@ uses
 
 type
   TLibreTranslateService = class(TBaseTranslationService, ITranslationService)
-  private
-    const
-      BASE_URL = 'https://trans.zillyhuhn.com/translate';
   protected
     procedure InitializeLanguageMappings; override;
   public
     constructor Create;
     destructor Destroy; override;
 
-    function Translate(const AText, ASourceLang, ADestLang: string): string;
-    function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean;
-    function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean;
+    function Translate(const AText, ASourceLang, ADestLang: string): string; override;
+    function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
+    function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function SupportBatchTranslations: Boolean; override;
     function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string): TArray<string>; override;
+    procedure SetBaseURL; override;
+    function DelDefaultBaseTranslator: Boolean; override;
   end;
 
 implementation
@@ -33,14 +32,8 @@ uses
 { TLibreTranslateService }
 
 constructor TLibreTranslateService.Create;
-var
-  DefaultApiKeys: TList<string>;
 begin
   Inherited create;
-  // Initialize default translator with an empty API key
-  DefaultApiKeys := TList<string>.Create;
-  DefaultApiKeys.Add(''); // Add empty API key
-  FTranslators.Add(BASE_URL, DefaultApiKeys);
 end;
 
 destructor TLibreTranslateService.Destroy;
@@ -62,6 +55,12 @@ begin
   // You can override existing mappings if needed
 end;
 
+procedure TLibreTranslateService.SetBaseURL;
+begin
+  inherited;
+  FBASE_URL := 'https://trans.zillyhuhn.com/translate';
+end;
+
 function TLibreTranslateService.SupportBatchTranslations: Boolean;
 begin
   Result := false;
@@ -78,7 +77,6 @@ var
   SelectedTranslatorUrl: string;
   Success: Boolean;
   I: Integer;
-  LLangCode: string;
 begin
   Result := '';
   Success := False;
@@ -86,12 +84,11 @@ begin
   LRequestBody := TStringStream.Create;
   try
     // Prepare the JSON request body
-    LLangCode := Self.LanguageNameToCode(ADestLang);
     LJson := TJSONObject.Create;
     try
       LJson.AddPair('q', AText);
       LJson.AddPair('source', ASourceLang);
-      LJson.AddPair('target', LLangCode);
+      LJson.AddPair('target', ADestLang);
       LJson.AddPair('format', 'html');
 //      LJson.AddPair('alternatives', 3);
 
@@ -118,10 +115,16 @@ begin
         LRequestBody.Position := 0;
 
         // Make the POST request
-        LResponse := FHttpClient.Post(SelectedTranslatorUrl, LRequestBody, nil, [TNetHeader.Create('Content-Type', 'application/json')]);
+        try
+          LResponse := FHttpClient.Post(SelectedTranslatorUrl, LRequestBody, nil, [TNetHeader.Create('Content-Type', 'application/json')]);
+        except
+          on E: Exception do
+          begin
+          end;
+        end;
 
         // Check response status
-        if LResponse.StatusCode = 200 then
+        if (LResponse <> nil) and (LResponse.StatusCode = 200) then
         begin
           // Parse the response
           var LResStr := LResponse.ContentAsString;
@@ -155,11 +158,13 @@ var
   LJsonArrayString: string;
   LTranslatedTexts: string; // Assuming Translate returns a JSON array string
   I, J, LTransCountOnce: Integer;
-  LStartIndex, LEndIndex: Integer;
+//  LStartIndex, LEndIndex: Integer;
   LResult: TList<string>; // Use a dynamic list for easier accumulation
   LJsonValue: TJSONArray;
 begin
   // Initialize the result list
+  raise Exception.Create('Not implement.');
+
   LResult := TList<string>.Create;
   try
     // Process texts in chunks of 8
@@ -220,6 +225,7 @@ function TLibreTranslateService.AddTranslator(const ATransApiUrl, AApiKey: strin
 var
   ApiKeys: TList<string>;
 begin
+  inherited;
   Result := False; // Default result
   if not FTranslators.ContainsKey(ATransApiUrl) then
   begin
@@ -239,8 +245,14 @@ begin
   end;
 end;
 
+function TLibreTranslateService.DelDefaultBaseTranslator: Boolean;
+begin
+  Result := inherited;
+end;
+
 function TLibreTranslateService.DelTranslator(const ATransApiUrl, AApiKey: string): Boolean;
 begin
+  inherited;
   Result := False; // Default result
   if FTranslators.ContainsKey(ATransApiUrl) then
   begin
