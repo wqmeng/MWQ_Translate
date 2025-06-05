@@ -11,8 +11,8 @@ type
   TBaseTranslationService = class(TInterfacedObject, ITranslationService)
 
   protected
-
-    FBASE_URL : string;
+    FRetry: integer;
+    FBASE_URL: string;
     FAPIKEY: string;
 
     FHttpClient: THttpClient;
@@ -34,6 +34,8 @@ type
     function SupportBatchTranslations: Boolean; virtual;
     function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string): TArray<string>; virtual; abstract;
     function DelDefaultBaseTranslator: Boolean; virtual;
+    procedure SetTimeOut(const AMicroSeconds: Integer); virtual;
+    procedure SetRetry(const ARetry: Integer); virtual;
 
     property ApiKey: string read FAPIKEY write FAPIKEY;
 
@@ -45,6 +47,7 @@ constructor TBaseTranslationService.Create;
 var
   DefaultApiKeys: TList<string>;
 begin
+  FRetry := 3;
   FBASE_URL := '';
   FAPIKEY := '';
   SetBaseURL;
@@ -111,6 +114,18 @@ begin
   if FLanguageNamesToCodes.TryGetValue(AName, Result) then
     Exit;
   Result := ''; // Return empty if not found
+end;
+
+procedure TBaseTranslationService.SetRetry(const ARetry: Integer);
+begin
+  if FRetry <> ARetry then
+    FRetry := ARetry;
+end;
+
+procedure TBaseTranslationService.SetTimeOut(const AMicroSeconds: Integer);
+begin
+  if FHttpClient <> nil then
+    FHttpClient.ResponseTimeout := AMicroSeconds;
 end;
 
 function TBaseTranslationService.SupportBatchTranslations: Boolean;

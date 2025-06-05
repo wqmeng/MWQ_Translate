@@ -8,7 +8,7 @@ uses
   MWQ.Translate.TranslationServiceInterface, MWQ.Translate.Api.BaseTranslationService;
 
 type
-  TDeepLXService = class(TBaseTranslationService, ITranslationService)
+  TDeepLXService = class(TBaseTranslationService)
   protected
     procedure InitializeLanguageMappings; override;
   public
@@ -76,6 +76,7 @@ var
   SelectedTranslatorUrl: string;
   Success: Boolean;
   I: Integer;
+  LRetry: Integer;
 begin
   Result := '';
   Success := False;
@@ -92,6 +93,8 @@ begin
 
       // Get all translator URLs
       TranslatorUrls := FTranslators.Keys.ToArray;
+      LRequestBody.WriteString(LJson.ToString);
+      LRequestBody.Position := 0;
 
       // Try each translator URL
       for I := 0 to Length(TranslatorUrls) - 1 do
@@ -109,32 +112,51 @@ begin
           ApiKey := ''; // Handle case where there are no API keys
 
 //        LJson.AddPair('api_key', ApiKey);
-        LRequestBody.WriteString(LJson.ToString);
-        LRequestBody.Position := 0;
         // Make the POST request
-        try
-          LResponse := FHttpClient.Post(SelectedTranslatorUrl, LRequestBody, nil,
-            [TNetHeader.Create('Content-Type', 'application/json'), TNetHeader.Create('Authorization', format('f''Bearer {%s}', [ApiKey]))]);
-        except
-          on E: Exception do
-          begin
-          end;
-        end;
-
-        // Check response status
-        if (LResponse <> nil) and (LResponse.StatusCode = 200) then
+        LRetry := 0;
+        while LRetry < FRetry do
         begin
-          // Parse the response
-          var LResStr := LResponse.ContentAsString;
-          LJsonResp := TJSONObject.ParseJSONValue(LResStr) as TJSONObject;
+          Inc(LRetry);
           try
-            Result := LJsonResp.GetValue<string>('data');
-            Success := True;
-            Break; // Exit the loop on success
-          finally
-            LJsonResp.Free;
+            LResponse := FHttpClient.Post(
+              SelectedTranslatorUrl,
+              LRequestBody,
+              nil,
+              [
+                TNetHeader.Create('Content-Type', 'application/json'),
+                TNetHeader.Create('Authorization', 'Bearer ' + ApiKey)
+              ]
+            );
+            // Check response status
+            if (LResponse <> nil) and (LResponse.StatusCode = 200) then
+            begin
+              // Parse the response
+              var LResStr := LResponse.ContentAsString;
+              LJsonResp := TJSONObject.ParseJSONValue(LResStr) as TJSONObject;
+              try
+                Result := LJsonResp.GetValue<string>('data');
+                if Result <> '' then begin
+                  Success := True;
+                  Exit; // Exit the loop on success
+                end;
+              finally
+                LJsonResp.Free;
+              end;
+            end;
+          except
+            on E: Exception do
+            begin
+              // Optionally log: Log(Format('Attempt %d failed: %s', [LRetry, E.Message]));
+              if LRetry >= FRetry then
+                raise;
+              // Optionally wait before retrying
+              Sleep(200);
+            end;
           end;
         end;
+        if Success then
+          Break;
+
       end;
 
       // If all translators failed, you can handle that case here if needed

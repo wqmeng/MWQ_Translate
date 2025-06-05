@@ -17,6 +17,8 @@ type
     function SupportBatchTranslations: Boolean;
     function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string): TArray<string>;
     function DelDefaultBaseTranslator: Boolean;
+    procedure SetTimeOut(const AMicroSeconds: Integer);
+    procedure SetRetry(const ARetry: Integer);
   end;
 
 implementation
