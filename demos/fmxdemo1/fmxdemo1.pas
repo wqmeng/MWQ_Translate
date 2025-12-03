@@ -28,7 +28,7 @@ implementation
 
 procedure TForm13.btn1Click(Sender: TObject);
 var
-  LibreService, LDeepLXService, MicrosoftService: ITranslationService;
+  LibreService, LDeepLXService, LOllamaService: ITranslationService;
   TranslatedText: string;
   SubscriptionKey: string;
   LTranslationManager: TTranslationManager;
@@ -38,13 +38,14 @@ begin
 //    LibreService := LTranslationManager.RegisterService(TTranslationService.tsLibreTranslate, '');
 //    LibreService.DelDefaultBaseTranslator;
 //    LibreService.AddTranslator('http://127.0.0.1:5000/translate', '');
-
-    LDeepLXService:= LTranslationManager.RegisterService(TTranslationService.tsDeepLXTranslate, '');
-
 //    MicrosoftService := LTranslationManager.RegisterService(TTranslationService.tsMicrosoftTranslate, 'YOUR_SUBSCRIPTION_KEY');
+//    LDeepLXService := LTranslationManager.RegisterService(TTranslationService.tsDeepLXTranslate, '');
 
-    if LTranslationManager.IsServiceRegistered(TTranslationService.tsDeepLXTranslate) then
-      lbl2.Text := LTranslationManager.TranslateByName(TranslationServiceNames[TTranslationService.tsDeepLXTranslate], lbl1.Text, 'Englist', 'Chinese');
+    LOllamaService := LTranslationManager.RegisterService(TTranslationService.tsOllamaTranslate, '');
+    LOllamaService.SetModel('hf-mirror.com/SpaceTimee/Suri-Qwen-3.1-4B-Uncensored-GGUF:Q4_K_M');
+
+    if LTranslationManager.IsServiceRegistered(TTranslationService.tsOllamaTranslate) then
+      lbl2.Text := LTranslationManager.TranslateByName(TranslationServiceNames[TTranslationService.tsOllamaTranslate], lbl1.Text, 'English', 'Chinese');
   except
     Log.d('Translate fail.');
   end;

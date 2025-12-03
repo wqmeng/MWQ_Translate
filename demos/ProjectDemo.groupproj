@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{58028B97-7220-4E7B-8852-DD0851CC9914}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="..\packages\D12\MWQ_Translate.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="fmxdemo1\Demo1.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="MWQ_Translate">
+        <MSBuild Projects="..\packages\D12\MWQ_Translate.dproj"/>
+    </Target>
+    <Target Name="MWQ_Translate:Clean">
+        <MSBuild Projects="..\packages\D12\MWQ_Translate.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="MWQ_Translate:Make">
+        <MSBuild Projects="..\packages\D12\MWQ_Translate.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Demo1">
+        <MSBuild Projects="fmxdemo1\Demo1.dproj"/>
+    </Target>
+    <Target Name="Demo1:Clean">
+        <MSBuild Projects="fmxdemo1\Demo1.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Demo1:Make">
+        <MSBuild Projects="fmxdemo1\Demo1.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="MWQ_Translate;Demo1"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="MWQ_Translate:Clean;Demo1:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="MWQ_Translate:Make;Demo1:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
