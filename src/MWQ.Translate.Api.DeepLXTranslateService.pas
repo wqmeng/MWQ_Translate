@@ -164,6 +164,7 @@ begin
         Result := 'Translation failed with all available translators.';
 
     finally
+      SetLength(TranslatorUrls, 0);
       LJson.Free;
     end;
   finally
