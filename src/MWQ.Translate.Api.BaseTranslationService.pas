@@ -14,6 +14,7 @@ type
     FRetry: integer;
     FBASE_URL: string;
     FAPIKEY: string;
+    FModel: String;
 
     FHttpClient: THttpClient;
     FTranslators: TDictionary<string, TList<string>>;
@@ -36,7 +37,7 @@ type
     function DelDefaultBaseTranslator: Boolean; virtual;
     procedure SetTimeOut(const AMicroSeconds: Integer); virtual;
     procedure SetRetry(const ARetry: Integer); virtual;
-
+    procedure SetModel(const AModel: String); virtual;
     property ApiKey: string read FAPIKEY write FAPIKEY;
 
   end;
@@ -76,14 +77,14 @@ var
 begin
   FLanguageNamesToCodes.Free;
   FLanguageCodesToNames.Free;
-
-  LKeys := FTranslators.Keys.ToArray;
-  for I := Low(LKeys) to High(LKeys) do begin
-    FTranslators[LKeys[I]].Free;
+  if FTranslators <> nil then begin
+    LKeys := FTranslators.Keys.ToArray;
+    for I := Low(LKeys) to High(LKeys) do begin
+      FTranslators[LKeys[I]].Free;
+    end;
+    FTranslators.Clear;
+    FTranslators.free;
   end;
-  FTranslators.Clear;
-  FTranslators.free;
-
   FHttpClient.Free;
   inherited;
 end;
@@ -114,6 +115,11 @@ begin
   if FLanguageNamesToCodes.TryGetValue(AName, Result) then
     Exit;
   Result := ''; // Return empty if not found
+end;
+
+procedure TBaseTranslationService.SetModel(const AModel: String);
+begin
+  FModel := AModel;
 end;
 
 procedure TBaseTranslationService.SetRetry(const ARetry: Integer);

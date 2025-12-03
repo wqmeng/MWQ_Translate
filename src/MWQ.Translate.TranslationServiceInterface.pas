@@ -19,6 +19,7 @@ type
     function DelDefaultBaseTranslator: Boolean;
     procedure SetTimeOut(const AMicroSeconds: Integer);
     procedure SetRetry(const ARetry: Integer);
+    procedure SetModel(const AModel: String);
   end;
 
 implementation
