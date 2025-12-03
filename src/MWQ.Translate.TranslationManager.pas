@@ -26,7 +26,7 @@ implementation
 
 uses
   MWQ.Translate.Api.LibreTranslateService, MWQ.Translate.Api.DeepLXTranslateService,
-  MwQ.Translate.Api.MicrosoftTranslateService;
+  MwQ.Translate.Api.MicrosoftTranslateService, MWQ.Translate.Api.OllamaLocalTranslateService;
 
 { TTranslationManager }
 
@@ -87,6 +87,8 @@ begin
         Result := TLibreTranslateService.create;
       tsDeepLXTranslate:
         Result := TDeepLXService.create;
+      tsOllamaTranslate:
+        Result := TOllamaService.create;
     end;
     if Result <> nil then
       FServices.Add(TranslationServiceNames[AService], Result);
@@ -110,7 +112,7 @@ var
   Service: ITranslationService;
 begin
   if FServices.TryGetValue(AServiceName, Service) then
-    Result := Service.Translate(AText, Service.LanguageNameToCode(ASourceLangName), Service.LanguageNameToCode(ADestLangName))
+    Result := Service.Translate(AText, ASourceLangName, ADestLangName)
   else
     raise Exception.Create('Translation service not found: ' + AServiceName);
 end;
