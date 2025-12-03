@@ -3,11 +3,11 @@ unit MwQ.Translate.Api.MicrosoftTranslateService;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Net.HttpClient, System.Net.HttpClientComponent, System.Net.URLClient,
+  System.SysUtils, System.Classes, System.Net.HttpClient, System.Net.HttpClientComponent, System.Net.URLClient, System.Generics.Collections,
   System.JSON, MWQ.Translate.TranslationServiceInterface, MWQ.Translate.Api.BaseTranslationService;
 
 type
-  TMicrosoftTranslateService = class(TBaseTranslationService, ITranslationService)
+  TMicrosoftTranslateService = class(TBaseTranslationService)
   private
 
   protected

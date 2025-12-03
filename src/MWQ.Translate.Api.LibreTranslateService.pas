@@ -8,7 +8,7 @@ uses
   MWQ.Translate.TranslationServiceInterface, MWQ.Translate.Api.BaseTranslationService;
 
 type
-  TLibreTranslateService = class(TBaseTranslationService, ITranslationService)
+  TLibreTranslateService = class(TBaseTranslationService)
   protected
     procedure InitializeLanguageMappings; override;
   public
