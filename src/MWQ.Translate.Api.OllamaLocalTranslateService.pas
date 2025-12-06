@@ -32,7 +32,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function Translate(const AText, ASourceLang, ADestLang: string): string; override;
+    function Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string; override;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function SupportBatchTranslations: Boolean; override;
@@ -171,7 +171,7 @@ begin
   Result := false;
 end;
 
-function TOllamaService.Translate(const AText, ASourceLang, ADestLang: string): string;
+function TOllamaService.Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string;
 var
   LReqBody: TStringStream;        // Holds the JSON payload for the HTTP POST
   LResponse: IHTTPResponse;       // Holds the HTTP response returned by the Ollama server
@@ -184,11 +184,22 @@ var
 begin
   Result := ''; // Initialize result
 
+  if ADestLang = '' then
+    Exit;
+
   // -------------------------------
   // Step 1: Prepare human-readable language names for logging
   // -------------------------------
-  LSrc := Self.LanguageCodeToName(ASourceLang);  // e.g., "en" → "English"
-  LDst := Self.LanguageCodeToName(ADestLang);    // e.g., "zh" → "Chinese"
+  if IsCode then begin
+    LSrc := Self.LanguageCodeToName(ASourceLang);  // e.g., "en" → "English"
+    LDst := Self.LanguageCodeToName(ADestLang);    // e.g., "zh" → "Chinese"
+  end else begin
+    if ASourceLang = '' then
+      LSrc := 'English'
+    else
+      LSrc := ASourceLang;  // e.g., "en" → "English"
+    LDst := ADestLang;    // e.g., "zh" → "Chinese"
+  end;
 
   // -------------------------------
   // Step 2: Prepare the payload based on endpoint flavor

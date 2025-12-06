@@ -15,7 +15,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function Translate(const AText, ASourceLang, ADestLang: string): string; override;
+    function Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string; override;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function SupportBatchTranslations: Boolean; override;
@@ -66,7 +66,7 @@ begin
   Result := false;
 end;
 
-function TLibreTranslateService.Translate(const AText, ASourceLang, ADestLang: string): string;
+function TLibreTranslateService.Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string;
 var
   LResponse: IHTTPResponse;
   LRequestBody: TStringStream;
@@ -77,8 +77,23 @@ var
   SelectedTranslatorUrl: string;
   Success: Boolean;
   I: Integer;
+  LSrc, LDst: String;
 begin
   Result := '';
+  if ADestLang = '' then
+    Exit;
+
+  if not IsCode then begin
+    LSrc := Self.LanguageNameToCode(ASourceLang);  // e.g., "English" ¡ú "en"
+    LDst := Self.LanguageNameToCode(ADestLang);    // e.g., "Chinese" ¡ú "zh"
+  end else begin
+    if ASourceLang = '' then
+      LSrc := 'en'
+    else
+      LSrc := ASourceLang;
+    LDst := ADestLang;
+  end;
+
   Success := False;
 
   LRequestBody := TStringStream.Create;
@@ -87,8 +102,8 @@ begin
     LJson := TJSONObject.Create;
     try
       LJson.AddPair('q', AText);
-      LJson.AddPair('source', ASourceLang);
-      LJson.AddPair('target', ADestLang);
+      LJson.AddPair('source', LSrc);
+      LJson.AddPair('target', LDst);
       LJson.AddPair('format', 'html');
 //      LJson.AddPair('alternatives', 3);
 

@@ -7,6 +7,7 @@ object Form13: TForm13
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
   DesignerMasterStyle = 0
   object lbl1: TLabel
     Position.X = 56.000000000000000000
@@ -23,14 +24,20 @@ object Form13: TForm13
   object btn1: TButton
     Position.X = 224.000000000000000000
     Position.Y = 56.000000000000000000
+    Size.Width = 129.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
     TabOrder = 3
-    Text = 'Translate'
+    Text = 'Translate (Ollama)'
     TextSettings.Trimming = None
     OnClick = btn1Click
   end
   object btn2: TButton
     Position.X = 224.000000000000000000
     Position.Y = 104.000000000000000000
+    Size.Width = 129.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
     TabOrder = 4
     Text = 'Translate (Libre)'
     TextSettings.Trimming = None

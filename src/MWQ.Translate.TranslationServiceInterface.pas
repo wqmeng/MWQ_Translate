@@ -8,7 +8,7 @@ uses
 type
   ITranslationService = interface
     ['{D6E2B1E5-5F77-4D7C-8FFD-9E5E8C8B7B75}']
-    function Translate(const AText, ASourceLang, ADestLang: string): string;
+    function Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean;
     function LanguageNameToCode(const AName: string): string;
@@ -20,6 +20,7 @@ type
     procedure SetTimeOut(const AMicroSeconds: Integer);
     procedure SetRetry(const ARetry: Integer);
     procedure SetModel(const AModel: String);
+    function GetModel: string;
   end;
 
 implementation

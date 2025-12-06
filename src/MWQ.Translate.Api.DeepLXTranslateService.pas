@@ -15,7 +15,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function Translate(const AText, ASourceLang, ADestLang: string): string; override;
+    function Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string; override;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function SupportBatchTranslations: Boolean; override;
@@ -65,7 +65,7 @@ begin
   Result := false;
 end;
 
-function TDeepLXService.Translate(const AText, ASourceLang, ADestLang: string): string;
+function TDeepLXService.Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string;
 var
   LResponse: IHTTPResponse;
   LRequestBody: TStringStream;
@@ -77,9 +77,22 @@ var
   Success: Boolean;
   I: Integer;
   LRetry: Integer;
+  LSrc, LDst: String;
 begin
   Result := '';
-  Success := False;
+  if ADestLang = '' then
+    Exit;
+
+  if not IsCode then begin
+    LSrc := Self.LanguageNameToCode(ASourceLang);  // e.g., "English" ¡ú "en"
+    LDst := Self.LanguageNameToCode(ADestLang);    // e.g., "Chinese" ¡ú "zh"
+  end else begin
+    if ASourceLang = '' then
+      LSrc := 'en'
+    else
+      LSrc := ASourceLang;
+    LDst := ADestLang;
+  end;
 
   LRequestBody := TStringStream.Create;
   try
@@ -87,8 +100,8 @@ begin
     LJson := TJSONObject.Create;
     try
       LJson.AddPair('text', AText);
-      LJson.AddPair('source_lang', ASourceLang.ToUpper);
-      LJson.AddPair('target_lang', ADestLang.ToUpper);
+      LJson.AddPair('source_lang', LSrc.ToUpper);
+      LJson.AddPair('target_lang', LDst.ToUpper);
 //      LJson.AddPair('alternatives', 3);
 
       // Get all translator URLs

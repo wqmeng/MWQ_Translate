@@ -102,7 +102,7 @@ var
   Service: ITranslationService;
 begin
   if FServices.TryGetValue(AServiceName, Service) then
-    Result := Service.Translate(AText, ASourceLangCode, ADestLangCode)
+    Result := Service.Translate(AText, ASourceLangCode, ADestLangCode, true)
   else
     raise Exception.Create('Translation service not found: ' + AServiceName);
 end;
@@ -112,7 +112,7 @@ var
   Service: ITranslationService;
 begin
   if FServices.TryGetValue(AServiceName, Service) then
-    Result := Service.Translate(AText, ASourceLangName, ADestLangName)
+    Result := Service.Translate(AText, ASourceLangName, ADestLangName, false)
   else
     raise Exception.Create('Translation service not found: ' + AServiceName);
 end;

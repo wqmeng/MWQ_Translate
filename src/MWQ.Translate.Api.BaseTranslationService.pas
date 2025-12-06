@@ -26,7 +26,7 @@ type
     destructor Destroy; override;
 
     procedure SetBaseURL(const ABaseUrl: string); virtual;
-    function Translate(const AText, ASourceLang, ADestLang: string): string; virtual; abstract;
+    function Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string; virtual; abstract;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; virtual; abstract;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; virtual; abstract;
     function GetSupportedLanguages: TDictionary<string, string>; // New method
@@ -38,6 +38,7 @@ type
     procedure SetTimeOut(const AMicroSeconds: Integer); virtual;
     procedure SetRetry(const ARetry: Integer); virtual;
     procedure SetModel(const AModel: String); virtual;
+    function GetModel: string; virtual;
     property ApiKey: string read FAPIKEY write FAPIKEY;
 
   end;
@@ -86,6 +87,11 @@ begin
   end;
   FHttpClient.Free;
   inherited;
+end;
+
+function TBaseTranslationService.GetModel: string;
+begin
+  Result := FModel;
 end;
 
 function TBaseTranslationService.GetSupportedLanguages: TDictionary<string, string>;
