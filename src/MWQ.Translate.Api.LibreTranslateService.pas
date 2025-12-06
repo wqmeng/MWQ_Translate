@@ -20,7 +20,7 @@ type
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function SupportBatchTranslations: Boolean; override;
     function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string): TArray<string>; override;
-    procedure SetBaseURL; override;
+    procedure SetBaseURL(const ABaseUrl: string); override;
     function DelDefaultBaseTranslator: Boolean; override;
   end;
 
@@ -34,6 +34,7 @@ uses
 constructor TLibreTranslateService.Create;
 begin
   Inherited create;
+  FBASE_URL := 'https://trans.zillyhuhn.com/translate';
 end;
 
 destructor TLibreTranslateService.Destroy;
@@ -55,10 +56,9 @@ begin
   // You can override existing mappings if needed
 end;
 
-procedure TLibreTranslateService.SetBaseURL;
+procedure TLibreTranslateService.SetBaseURL(const ABaseUrl: string);
 begin
   inherited;
-  FBASE_URL := 'https://trans.zillyhuhn.com/translate';
 end;
 
 function TLibreTranslateService.SupportBatchTranslations: Boolean;

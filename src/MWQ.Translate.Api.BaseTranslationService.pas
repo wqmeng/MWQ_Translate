@@ -21,11 +21,11 @@ type
     FLanguageNamesToCodes: TDictionary<string, string>;
     FLanguageCodesToNames: TDictionary<string, string>;
     procedure InitializeLanguageMappings; virtual;
-    procedure SetBaseURL; virtual; abstract;
   public
     constructor Create;
     destructor Destroy; override;
 
+    procedure SetBaseURL(const ABaseUrl: string); virtual;
     function Translate(const AText, ASourceLang, ADestLang: string): string; virtual; abstract;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; virtual; abstract;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; virtual; abstract;
@@ -51,7 +51,6 @@ begin
   FRetry := 3;
   FBASE_URL := '';
   FAPIKEY := '';
-  SetBaseURL;
   FHttpClient := THttpClient.Create;
   FTranslators := TDictionary<string, TList<string>>.Create;
   FLanguageNamesToCodes := TDictionary<string, string>.Create;
@@ -96,25 +95,51 @@ end;
 
 procedure TBaseTranslationService.InitializeLanguageMappings;
 begin
-  // Base language mappings
-  FLanguageNamesToCodes.Add('English', 'en');
-  FLanguageNamesToCodes.Add('Spanish', 'es');
-  FLanguageNamesToCodes.Add('French', 'fr');
-  FLanguageNamesToCodes.Add('German', 'de');
-  FLanguageNamesToCodes.Add('Chinese', 'zh');
-  FLanguageNamesToCodes.Add('Japanese', 'ja');
-  FLanguageNamesToCodes.Add('Russian', 'ru');
+  // Clear both
+  FLanguageCodesToNames.Clear;
+  FLanguageNamesToCodes.Clear;
 
+  // Canonical mapping
+  FLanguageCodesToNames.AddOrSetValue('en', 'English');
+  FLanguageCodesToNames.AddOrSetValue('es', 'Spanish');
+  FLanguageCodesToNames.AddOrSetValue('fr', 'French');
+  FLanguageCodesToNames.AddOrSetValue('de', 'German');
+
+  FLanguageCodesToNames.AddOrSetValue('zh', 'Simplified Chinese');
+  FLanguageCodesToNames.AddOrSetValue('zh-cn', 'Simplified Chinese');
+  FLanguageCodesToNames.AddOrSetValue('zh-tw', 'Traditional Chinese');
+  FLanguageCodesToNames.AddOrSetValue('zh-hk', 'Hong Kong Chinese');
+
+  FLanguageCodesToNames.AddOrSetValue('ja', 'Japanese');
+  FLanguageCodesToNames.AddOrSetValue('ru', 'Russian');
   // Populate reverse mappings
-  for var Pair in FLanguageNamesToCodes do
-    FLanguageCodesToNames.Add(Pair.Value, Pair.Key);
+  for var Pair in FLanguageCodesToNames do
+    FLanguageNamesToCodes.AddOrSetValue(Pair.Value, Pair.Key);
 end;
 
 function TBaseTranslationService.LanguageNameToCode(const AName: string): string;
+var
+  Pair: TPair<string, string>;
+  LName: string;
 begin
-  if FLanguageNamesToCodes.TryGetValue(AName, Result) then
-    Exit;
-  Result := ''; // Return empty if not found
+  Result := '';
+  if AName = '' then Exit;
+  LName := AName.ToLower;
+
+  // Iterate over key-value pairs directly
+  for Pair in FLanguageNamesToCodes do
+  begin
+    if SameText(Pair.Key.ToLower, LName) then
+    begin
+      Result := Pair.Value;
+      Exit;
+    end;
+  end;
+end;
+
+procedure TBaseTranslationService.SetBaseURL(const ABaseUrl: string);
+begin
+  FBASE_URL := ABaseUrl;
 end;
 
 procedure TBaseTranslationService.SetModel(const AModel: String);
@@ -140,10 +165,15 @@ begin
 end;
 
 function TBaseTranslationService.LanguageCodeToName(const ACode: string): string;
+var
+  Key: string;
 begin
-  if FLanguageCodesToNames.TryGetValue(ACode, Result) then
+  if ACode = '' then
+    Exit('English');
+  Key := ACode.ToLower;
+  if FLanguageCodesToNames.TryGetValue(Key, Result) then
     Exit;
-  Result := ''; // Return empty if not found
+  Result := 'English'; // Return English if not found
 end;
 
 end.

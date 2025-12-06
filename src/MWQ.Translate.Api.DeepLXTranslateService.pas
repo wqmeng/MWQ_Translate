@@ -20,7 +20,7 @@ type
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function SupportBatchTranslations: Boolean; override;
     function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string): TArray<string>; override;
-    procedure SetBaseURL; override;
+    procedure SetBaseURL(const ABaseUrl: string); override;
   end;
 
 implementation
@@ -33,6 +33,7 @@ uses
 constructor TDeepLXService.Create;
 begin
   Inherited create;
+  FBASE_URL := 'http://127.0.0.1:62155/translate';
 end;
 
 destructor TDeepLXService.Destroy;
@@ -54,10 +55,9 @@ begin
   // You can override existing mappings if needed
 end;
 
-procedure TDeepLXService.SetBaseURL;
+procedure TDeepLXService.SetBaseURL(const ABaseUrl: string);
 begin
   inherited;
-  FBASE_URL := 'http://127.0.0.1:62155/translate';
 end;
 
 function TDeepLXService.SupportBatchTranslations: Boolean;

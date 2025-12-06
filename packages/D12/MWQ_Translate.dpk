@@ -28,7 +28,9 @@ package MWQ_Translate;
 {$IMPLICITBUILD ON}
 
 requires
-  rtl;
+  rtl,
+  QuickLogger_D12,
+  MWQ_AI;
 
 contains
   MWQ.Translate.TranslationManager in '..\..\src\MWQ.Translate.TranslationManager.pas',

@@ -12,11 +12,11 @@ type
 
   protected
     procedure InitializeLanguageMappings; override;
-    procedure SetBaseURL; override;
   public
     constructor Create(const ASubscriptionKey: string);
     destructor Destroy; override;
 
+    procedure SetBaseURL(const ABaseUrl: string); override;
     function Translate(const AText, ASourceLang, ADestLang: string): string; override;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
@@ -37,6 +37,7 @@ constructor TMicrosoftTranslateService.Create(const ASubscriptionKey: string);
 begin
   Inherited Create;
   FAPIKEY := ASubscriptionKey;
+  FBASE_URL := 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
 end;
 
 function TMicrosoftTranslateService.DelTranslator(const ATransApiUrl,
@@ -58,10 +59,9 @@ begin
 //  FLanguageNamesToCodes['Chinese Traditional'] := 'zh-ts';
 end;
 
-procedure TMicrosoftTranslateService.SetBaseURL;
+procedure TMicrosoftTranslateService.SetBaseURL(const ABaseUrl: string);
 begin
   inherited;
-  FBASE_URL := 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
 end;
 
 function TMicrosoftTranslateService.Translate(const AText, ASourceLang, ADestLang: string): string;
