@@ -12,7 +12,9 @@ type
     lbl1: TLabel;
     lbl2: TLabel;
     btn1: TButton;
+    btn2: TButton;
     procedure btn1Click(Sender: TObject);
+    procedure btn2Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -51,6 +53,26 @@ begin
   end;
 
   LTranslationManager.free;
+end;
+
+procedure TForm13.btn2Click(Sender: TObject);
+var
+  LTranslationManager: TTranslationManager;
+  LibreService: ITranslationService;
+begin
+  LTranslationManager := TTranslationManager.Create;
+  try
+    LibreService := LTranslationManager.RegisterService(TTranslationService.tsLibreTranslate, '');
+    // Ensure the default/public translator is present; replace URL if you run your own instance
+    LibreService.AddTranslator('https://trans.zillyhuhn.com/translate', '');
+
+    if LTranslationManager.IsServiceRegistered(TTranslationService.tsLibreTranslate) then
+      lbl2.Text := LTranslationManager.TranslateByName(TranslationServiceNames[TTranslationService.tsLibreTranslate], lbl1.Text, 'English', 'Chinese');
+  except
+    on E: Exception do
+      Log.d('Libre translate fail: ' + E.Message);
+  end;
+  LTranslationManager.Free;
 end;
 
 end.
