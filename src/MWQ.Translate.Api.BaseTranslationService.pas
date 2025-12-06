@@ -33,7 +33,7 @@ type
     function LanguageNameToCode(const AName: string): string;
     function LanguageCodeToName(const ACode: string): string;
     function SupportBatchTranslations: Boolean; virtual;
-    function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string): TArray<string>; virtual; abstract;
+    function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string; const IsCode: Boolean = false): TArray<string>; virtual; abstract;
     function DelDefaultBaseTranslator: Boolean; virtual;
     procedure SetTimeOut(const AMicroSeconds: Integer); virtual;
     procedure SetRetry(const ARetry: Integer); virtual;

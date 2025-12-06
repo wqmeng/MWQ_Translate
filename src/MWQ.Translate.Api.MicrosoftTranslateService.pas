@@ -20,7 +20,7 @@ type
     function Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string; override;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
-    function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string): TArray<string>; override;
+    function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string; const IsCode: Boolean = false): TArray<string>; override;
   end;
 
 implementation
@@ -135,9 +135,24 @@ begin
 end;
 
 function TMicrosoftTranslateService.TranslateBatch(const ATexts: TArray<string>;
-  const ASourceLang, ADestLang: string): TArray<string>;
+  const ASourceLang, ADestLang: string; const IsCode: Boolean = false): TArray<string>;
+  LSrc, LDst: String;
 begin
   raise Exception.Create('Not implement.');
+
+  if ADestLang = '' then
+    Exit;
+
+  if not IsCode then begin
+    LSrc := Self.LanguageNameToCode(ASourceLang);  // e.g., "English" ¡ú "en"
+    LDst := Self.LanguageNameToCode(ADestLang);    // e.g., "Chinese" ¡ú "zh"
+  end else begin
+    if ASourceLang = '' then
+      LSrc := 'en'
+    else
+      LSrc := ASourceLang;
+    LDst := ADestLang;
+  end;
 
   Result := [];
 end;

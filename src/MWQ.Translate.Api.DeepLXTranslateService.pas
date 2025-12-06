@@ -19,7 +19,7 @@ type
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function SupportBatchTranslations: Boolean; override;
-    function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string): TArray<string>; override;
+    function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string; const IsCode: Boolean = false): TArray<string>; override;
     procedure SetBaseURL(const ABaseUrl: string); override;
   end;
 
@@ -185,7 +185,7 @@ begin
   end;
 end;
 
-function TDeepLXService.TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string): TArray<string>;
+function TDeepLXService.TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string; const IsCode: Boolean = false): TArray<string>;
 const
   LIMITCOUNT = 4;
 var
@@ -195,8 +195,23 @@ var
 //  LStartIndex, LEndIndex: Integer;
   LResult: TList<string>; // Use a dynamic list for easier accumulation
   LJsonValue: TJSONArray;
+  LSrc, LDst: String;
 begin
   raise Exception.Create('Not implement.');
+
+  if ADestLang = '' then
+    Exit;
+
+  if not IsCode then begin
+    LSrc := Self.LanguageNameToCode(ASourceLang);  // e.g., "English" ¡ú "en"
+    LDst := Self.LanguageNameToCode(ADestLang);    // e.g., "Chinese" ¡ú "zh"
+  end else begin
+    if ASourceLang = '' then
+      LSrc := 'en'
+    else
+      LSrc := ASourceLang;
+    LDst := ADestLang;
+  end;
 
   // Initialize the result list
   LResult := TList<string>.Create;
@@ -222,7 +237,7 @@ begin
       LJsonArrayString := LJsonArrayString + ']';
 
       // Call the Translate function with the JSON array string
-      LTranslatedTexts := Translate(LJsonArrayString, ASourceLang, ADestLang);
+      LTranslatedTexts := Translate(LJsonArrayString, LSrc, LDst);
       LTranslatedTexts := 'result:' + LTranslatedTexts;
 
       // Parse the JSON array string manually

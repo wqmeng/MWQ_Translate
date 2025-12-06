@@ -36,7 +36,7 @@ type
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function SupportBatchTranslations: Boolean; override;
-    function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string): TArray<string>; override;
+    function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string; const IsCode: Boolean = false): TArray<string>; override;
     procedure SetBaseURL(const ABaseUrl: string); override;
     procedure SetModel(const AModel: String); override;
     procedure SetEndpointFlavor(const AEndPoint: TEndpointFlavor);
@@ -609,7 +609,7 @@ end;
 //end;
 
 function TOllamaService.TranslateBatch(const ATexts: TArray<string>;
-  const ASourceLang, ADestLang: string): TArray<string>;
+  const ASourceLang, ADestLang: string; const IsCode: Boolean = false): TArray<string>;
 begin
 
 end;
