@@ -5,6 +5,10 @@ interface
 uses
   System.SysUtils, System.Generics.Collections;
 
+const
+  TRANSLATION_FAIL_MSG = 'Translation failed.';
+  TRANSLATION_FAIL_ALL_MSG = 'Translation failed with all available translators.';
+
 type
   ITranslationService = interface
     ['{D6E2B1E5-5F77-4D7C-8FFD-9E5E8C8B7B75}']

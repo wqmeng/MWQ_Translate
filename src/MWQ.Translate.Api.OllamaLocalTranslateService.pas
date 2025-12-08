@@ -309,7 +309,7 @@ begin
           Log(Format('Translate attempt %d failed: %s', [LRetry, E.Message]), etError);
           if LRetry = FRetry then
           begin
-            Result := 'Translation failed.';
+            Result := TRANSLATION_FAIL_MSG;
             Log('Final Failure: ' + Result, etError);
             Exit;
           end;

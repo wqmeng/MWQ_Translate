@@ -156,7 +156,7 @@ begin
 
       // If all translators failed, you can handle that case here if needed
       if not Success then
-        Result := 'Translation failed with all available translators.';
+        Result := TRANSLATION_FAIL_ALL_MSG;
 
     finally
       LJson.Free;

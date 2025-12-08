@@ -136,6 +136,7 @@ end;
 
 function TMicrosoftTranslateService.TranslateBatch(const ATexts: TArray<string>;
   const ASourceLang, ADestLang: string; const IsCode: Boolean = false): TArray<string>;
+var
   LSrc, LDst: String;
 begin
   raise Exception.Create('Not implement.');
