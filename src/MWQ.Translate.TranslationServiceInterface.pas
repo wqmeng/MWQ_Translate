@@ -18,6 +18,7 @@ type
     function LanguageNameToCode(const AName: string): string;
     function LanguageCodeToName(const ACode: string): string;
     function GetSupportedLanguages: TDictionary<string, string>;
+    function SupportsLanguage(const Lang: string): Boolean;
     function SupportBatchTranslations: Boolean;
     function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string; const IsCode: Boolean = false): TArray<string>;
     function DelDefaultBaseTranslator: Boolean;

@@ -20,6 +20,13 @@ type
     function GetRegisteredServices: TStringList;
     function GetTranslateService(const AServiceName: string): ITranslationService;
     function IsServiceRegistered(AService: TTranslationService): Boolean;
+
+    function GetSupportedLanguages: TDictionary<string, string>;
+    function SupportsLanguage(const Lang: string): Boolean;
+    function GetBestServiceForLanguage(
+      const Lang: string
+    ): ITranslationService;
+
   end;
 
 implementation
@@ -41,6 +48,20 @@ begin
   inherited;
 end;
 
+function TTranslationManager.GetBestServiceForLanguage(
+  const Lang: string): ITranslationService;
+var
+  Service: TPair<string, ITranslationService>;
+  Normalized: string;
+begin
+  Result := nil;
+  Normalized := LowerCase(Lang);
+
+  for Service in FServices do
+    if Service.Value.SupportsLanguage(Normalized) then
+      Exit(Service.Value);
+end;
+
 function TTranslationManager.GetRegisteredServices: TStringList;
 var
   ServiceName: string;
@@ -56,6 +77,24 @@ begin
   except
     ServiceList.Free; // Ensure to free in case of an exception
     raise;
+  end;
+end;
+
+function TTranslationManager.GetSupportedLanguages: TDictionary<string, string>;
+var
+  ServicePair: TPair<string, ITranslationService>;
+  LangPair: TPair<string, string>;
+begin
+  Result := TDictionary<string, string>.Create;
+
+  for ServicePair in FServices do
+  begin
+    for LangPair in ServicePair.Value.GetSupportedLanguages do
+    begin
+      // Keep first occurrence (or override if you prefer)
+      if not Result.ContainsKey(LangPair.Key) then
+        Result.Add(LangPair.Key, LangPair.Value);
+    end;
   end;
 end;
 
@@ -94,6 +133,17 @@ begin
       FServices.Add(TranslationServiceNames[AService], Result);
   end else
     Result := FServices[TranslationServiceNames[AService]];
+end;
+
+function TTranslationManager.SupportsLanguage(const Lang: string): Boolean;
+var
+  ServicePair: TPair<string, ITranslationService>;
+begin
+  for ServicePair in FServices do
+    if ServicePair.Value.SupportsLanguage(Lang) then
+      Exit(True);
+
+  Result := False;
 end;
 
 function TTranslationManager.TranslateByCode(const AServiceName, AText,
