@@ -30,6 +30,7 @@ type
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; virtual; abstract;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; virtual; abstract;
     function GetSupportedLanguages: TDictionary<string, string>; // New method
+    function SupportsLanguage(const Lang: string): Boolean;
     function LanguageNameToCode(const AName: string): string;
     function LanguageCodeToName(const ACode: string): string;
     function SupportBatchTranslations: Boolean; virtual;
@@ -168,6 +169,20 @@ end;
 function TBaseTranslationService.SupportBatchTranslations: Boolean;
 begin
   Result := false;
+end;
+
+function TBaseTranslationService.SupportsLanguage(const Lang: string): Boolean;
+var
+  LDic: TDictionary<string, string>;
+  LLang: TPair<string, string>;
+begin
+  Result := false;
+  LDic := GetSupportedLanguages;
+  for LLang in LDic do begin
+    if SameText(LLang.Key, Lang) or SameText(LLang.Value, Lang) then begin
+      Exit(True);
+    end;
+  end;
 end;
 
 function TBaseTranslationService.LanguageCodeToName(const ACode: string): string;
