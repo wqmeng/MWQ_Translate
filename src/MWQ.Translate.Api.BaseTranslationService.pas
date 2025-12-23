@@ -26,7 +26,7 @@ type
     destructor Destroy; override;
 
     procedure SetBaseURL(const ABaseUrl: string); virtual;
-    function Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string; virtual; abstract;
+    function Translate(const AText, ASourceLang, ADestLang: string; var ATranslated: string; const IsCode: Boolean = false): Boolean; virtual; abstract;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; virtual; abstract;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; virtual; abstract;
     function GetSupportedLanguages: TDictionary<string, string>; // New method
@@ -97,7 +97,7 @@ end;
 
 function TBaseTranslationService.GetSupportedLanguages: TDictionary<string, string>;
 begin
-  Result := TDictionary<string, string>.Create(FLanguageNamesToCodes);
+  Result := TDictionary<string, string>.Create(FLanguageCodesToNames);
 end;
 
 procedure TBaseTranslationService.InitializeLanguageMappings;

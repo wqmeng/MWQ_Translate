@@ -12,7 +12,7 @@ const
 type
   ITranslationService = interface
     ['{D6E2B1E5-5F77-4D7C-8FFD-9E5E8C8B7B75}']
-    function Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string;
+    function Translate(const AText, ASourceLang, ADestLang: string; var ATranslated: string; const IsCode: Boolean = false): Boolean;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean;
     function LanguageNameToCode(const AName: string): string;

@@ -15,7 +15,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string; override;
+    function Translate(const AText, ASourceLang, ADestLang: string; var ATranslated: string; const IsCode: Boolean = false): Boolean; override;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function SupportBatchTranslations: Boolean; override;
@@ -66,7 +66,7 @@ begin
   Result := false;
 end;
 
-function TLibreTranslateService.Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string;
+function TLibreTranslateService.Translate(const AText, ASourceLang, ADestLang: string; var ATranslated: string; const IsCode: Boolean = false): Boolean;
 var
   LResponse: IHTTPResponse;
   LRequestBody: TStringStream;
@@ -79,7 +79,7 @@ var
   I: Integer;
   LSrc, LDst: String;
 begin
-  Result := '';
+  Result := false;
   if ADestLang = '' then
     Exit;
 
@@ -145,8 +145,8 @@ begin
           var LResStr := LResponse.ContentAsString;
           LJsonResp := TJSONObject.ParseJSONValue(LResStr) as TJSONObject;
           try
-            Result := LJsonResp.GetValue<string>('translatedText');
-            Success := True;
+            ATranslated := LJsonResp.GetValue<string>('translatedText');
+            Result := True;
             Break; // Exit the loop on success
           finally
             LJsonResp.Free;
@@ -155,8 +155,8 @@ begin
       end;
 
       // If all translators failed, you can handle that case here if needed
-      if not Success then
-        Result := TRANSLATION_FAIL_ALL_MSG;
+//      if not Success then
+//        Result := TRANSLATION_FAIL_ALL_MSG;
 
     finally
       LJson.Free;
@@ -217,8 +217,8 @@ begin
       LJsonArrayString := LJsonArrayString + ']';
 
       // Call the Translate function with the JSON array string
-      LTranslatedTexts := Translate(LJsonArrayString, LSrc, LDst);
-      LTranslatedTexts := 'result:' + LTranslatedTexts;
+      if Translate(LJsonArrayString, LSrc, LDst, LTranslatedTexts) then
+        LTranslatedTexts := 'result:' + LTranslatedTexts;
 
       // Parse the JSON array string manually
 //      if (LTranslatedTexts.StartsWith('[')) and (LTranslatedTexts.EndsWith(']')) then

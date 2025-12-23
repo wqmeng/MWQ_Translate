@@ -151,8 +151,9 @@ function TTranslationManager.TranslateByCode(const AServiceName, AText,
 var
   Service: ITranslationService;
 begin
+  Result := '';
   if FServices.TryGetValue(AServiceName, Service) then
-    Result := Service.Translate(AText, ASourceLangCode, ADestLangCode, true)
+    Service.Translate(AText, ASourceLangCode, ADestLangCode, Result, true)
   else
     raise Exception.Create('Translation service not found: ' + AServiceName);
 end;
@@ -161,8 +162,9 @@ function TTranslationManager.TranslateByName(const AServiceName, AText, ASourceL
 var
   Service: ITranslationService;
 begin
+  Result := '';
   if FServices.TryGetValue(AServiceName, Service) then
-    Result := Service.Translate(AText, ASourceLangName, ADestLangName, false)
+    Service.Translate(AText, ASourceLangName, ADestLangName, Result, false)
   else
     raise Exception.Create('Translation service not found: ' + AServiceName);
 end;

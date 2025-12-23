@@ -32,7 +32,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string; override;
+    function Translate(const AText, ASourceLang, ADestLang: string; var ATranslated: string; const IsCode: Boolean = false): Boolean; override;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function SupportBatchTranslations: Boolean; override;
@@ -120,7 +120,7 @@ begin
   end
   else begin
     TOllamaManager.AddActiveModel(FModel);
-    Log('Model "' + FModel + '" is already active.', etDebug);
+    Log('Model "' + FModel + '" is already active.', etInfo);
   end;
 
   if not TOllamaManager.IsKeepAliveThreadStarted then begin
@@ -171,18 +171,18 @@ begin
   Result := false;
 end;
 
-function TOllamaService.Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string;
+function TOllamaService.Translate(const AText, ASourceLang, ADestLang: string; var ATranslated: string; const IsCode: Boolean = false): Boolean;
 var
   LReqBody: TStringStream;        // Holds the JSON payload for the HTTP POST
   LResponse: IHTTPResponse;       // Holds the HTTP response returned by the Ollama server
   LJsonStr, LContent: string;     // LJsonStr = final JSON payload; LContent = parsed assistant output
   LRetry: Integer;                // Retry counter for failed requests
-  LSrc, LDst: string;             // Human-readable source/destination language names for logging
+  LOllamaUrl, LSrc, LDst: string;             // Human-readable source/destination language names for logging
   Msgs: TMessageArray;            // Array of role/content messages (used by chat endpoints)
   SysPrompt: string;              // Optional system prompt for chat-style payloads
   UserPrompt: string;             // Optional user prompt (used for efGenerate endpoint)
 begin
-  Result := ''; // Initialize result
+  Result := false; // Initialize result
 
   if ADestLang = '' then
     Exit;
@@ -256,9 +256,10 @@ begin
   // -------------------------------
 
   // --- Log the payload ---
-  Log('TOllamaService.Translate Payload: ' + sLineBreak + LJsonStr, etDebug);
+  Log('TOllamaService.Translate Payload: ' + sLineBreak + LJsonStr, etInfo);
 
   LReqBody := TStringStream.Create(LJsonStr, TEncoding.UTF8);
+  LOllamaUrl := BuildOllamaUrl(FEndPoint);
   try
     for LRetry := 1 to FRetry do
     begin
@@ -266,10 +267,10 @@ begin
         LReqBody.Position := 0;
         // --- Log before posting ---
         Log(Format('TOllamaService.Translate: Attempt %d sending request to [%s]%s%s',
-          [LRetry, BuildOllamaUrl(FEndPoint), sLineBreak, LJsonStr]), etDebug);
+          [LRetry, LOllamaUrl, sLineBreak, LJsonStr]), etInfo);
 
         LResponse := FHttpClient.Post(
-          BuildOllamaUrl(FEndPoint),
+          LOllamaUrl,
 //          FBASE_URL + 'v1/chat/completions',
           LReqBody,
           nil,
@@ -279,20 +280,21 @@ begin
         if (LResponse = nil) then
           raise Exception.Create('HTTP response is nil');
 
-        Log('HTTP Status: ' + LResponse.StatusCode.ToString, etDebug);
-        Log('Raw Response: ' + LResponse.ContentAsString, etDebug);
+        Log('HTTP Status: ' + LResponse.StatusCode.ToString, etInfo);
+        Log('Raw Response: ' + LResponse.ContentAsString, etInfo);
 
         if LResponse.StatusCode <> 200 then
           raise Exception.Create('HTTP Code ' + LResponse.StatusCode.ToString);
 
         LContent := LResponse.ContentAsString;
 
-        if TOllamaResponseParser.Parse(LContent, Self.FEndPoint, Result) then
+        if TOllamaResponseParser.Parse(LContent, Self.FEndPoint, ATranslated) then
         begin
-          Result := Trim(Result);
+          ATranslated := Trim(ATranslated);
+          Result := True;
           // ---- Log Success ----
-          Log('Source [' + LSrc + ']: ' + AText, etDebug);
-          Log('Translation [' + LDst + ']: ' + Result, etDebug);
+          Log('Source [' + LSrc + ']: ' + AText, etInfo);
+          Log('Translation [' + LDst + ']: ' + ATranslated, etInfo);
 
           Exit;
         end
@@ -300,7 +302,7 @@ begin
         begin
           // ---- Log Failure ----
           Log('Failed to parse response for Endpoint [' + EndpointFlavorNames[FEndPoint] + ']', etWarning);
-          Log('Raw Response: ' + LContent, etDebug);
+          Log('Raw Response: ' + LContent, etInfo);
         end;
 
       except
@@ -309,8 +311,7 @@ begin
           Log(Format('Translate attempt %d failed: %s', [LRetry, E.Message]), etError);
           if LRetry = FRetry then
           begin
-            Result := TRANSLATION_FAIL_MSG;
-            Log('Final Failure: ' + Result, etError);
+            Log('Final Failure: ', etError);
             Exit;
           end;
           Sleep(150);
