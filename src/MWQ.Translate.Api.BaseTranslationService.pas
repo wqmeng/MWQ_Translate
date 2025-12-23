@@ -97,7 +97,7 @@ end;
 
 function TBaseTranslationService.GetSupportedLanguages: TDictionary<string, string>;
 begin
-  Result := TDictionary<string, string>.Create(FLanguageCodesToNames);
+  Result := FLanguageCodesToNames;
 end;
 
 procedure TBaseTranslationService.InitializeLanguageMappings;
