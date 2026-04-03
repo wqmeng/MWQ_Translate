@@ -2,45 +2,134 @@ object Form13: TForm13
   Left = 0
   Top = 0
   Caption = 'Form13'
-  ClientHeight = 206
-  ClientWidth = 412
+  ClientHeight = 315
+  ClientWidth = 436
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
   OnCreate = FormCreate
   DesignerMasterStyle = 0
-  object lbl1: TLabel
-    Position.X = 56.000000000000000000
-    Position.Y = 56.000000000000000000
-    Text = 'Hello world.'
-    TabOrder = 1
-  end
-  object lbl2: TLabel
-    Position.X = 56.000000000000000000
-    Position.Y = 104.000000000000000000
-    Text = 'lbl2'
-    TabOrder = 2
-  end
-  object btn1: TButton
-    Position.X = 224.000000000000000000
-    Position.Y = 56.000000000000000000
+  object btnOllama: TButton
+    Position.X = 24.000000000000000000
+    Position.Y = 196.000000000000000000
     Size.Width = 129.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    Text = 'Translate (Ollama)'
+    TextSettings.Trimming = None
+    OnClick = btnOllamaClick
+  end
+  object btnLibre: TButton
+    Position.X = 24.000000000000000000
+    Position.Y = 236.000000000000000000
+    Size.Width = 129.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    Text = 'Translate (Libre)'
+    TextSettings.Trimming = None
+    OnClick = btnLibreClick
+  end
+  object cbbModel: TComboBox
+    Position.X = 24.000000000000000000
+    Position.Y = 46.000000000000000000
+    Size.Width = 233.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 3
-    Text = 'Translate (Ollama)'
-    TextSettings.Trimming = None
-    OnClick = btn1Click
+    OnChange = cbbModelChange
   end
-  object btn2: TButton
-    Position.X = 224.000000000000000000
-    Position.Y = 104.000000000000000000
-    Size.Width = 129.000000000000000000
+  object cbbSrcLang: TComboBox
+    Items.Strings = (
+      'English')
+    ItemIndex = 0
+    Position.X = 89.000000000000000000
+    Position.Y = 88.000000000000000000
+    Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 4
-    Text = 'Translate (Libre)'
-    TextSettings.Trimming = None
-    OnClick = btn2Click
+  end
+  object cbbDstLang: TComboBox
+    Position.X = 89.000000000000000000
+    Position.Y = 118.000000000000000000
+    Size.Width = 257.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 5
+  end
+  object edtSrc: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 6
+    Text = 'Hello, World.'
+    Position.X = 24.000000000000000000
+    Position.Y = 150.000000000000000000
+    Size.Width = 377.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object mmoResult: TMemo
+    Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+    DataDetectorTypes = []
+    TextSettings.WordWrap = True
+    Position.X = 174.000000000000000000
+    Position.Y = 196.000000000000000000
+    Size.Width = 227.000000000000000000
+    Size.Height = 105.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 8
+    Viewport.Width = 223.000000000000000000
+    Viewport.Height = 101.000000000000000000
+  end
+  object rbOllama: TRadioButton
+    GroupName = 'tr'
+    Position.X = 24.000000000000000000
+    Position.Y = 8.000000000000000000
+    Size.Width = 65.000000000000000000
+    Size.Height = 19.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 12
+    Text = 'Ollama'
+    OnChange = rbOllamaChange
+  end
+  object rbLibre: TRadioButton
+    GroupName = 'tr'
+    Position.X = 105.000000000000000000
+    Position.Y = 8.000000000000000000
+    Size.Width = 64.000000000000000000
+    Size.Height = 19.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 11
+    Text = 'Libre'
+    OnChange = rbLibreChange
+  end
+  object rbDeepLX: TRadioButton
+    GroupName = 'tr'
+    Position.X = 177.000000000000000000
+    Position.Y = 8.000000000000000000
+    Size.Width = 64.000000000000000000
+    Size.Height = 19.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 10
+    Text = 'DeepLX'
+  end
+  object lblSrc: TLabel
+    Position.X = 24.000000000000000000
+    Position.Y = 88.000000000000000000
+    Size.Width = 57.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'Source'
+    TabOrder = 14
+  end
+  object lblDest: TLabel
+    Position.X = 24.000000000000000000
+    Position.Y = 113.000000000000000000
+    Size.Width = 57.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'Target'
+    TabOrder = 13
   end
 end

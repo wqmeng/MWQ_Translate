@@ -9,6 +9,9 @@
         <Projects Include="fmxdemo1\Demo1.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="..\..\MWQ_AIPack\packages\D12\MWQ_AI.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,14 +38,23 @@
     <Target Name="Demo1:Make">
         <MSBuild Projects="fmxdemo1\Demo1.dproj" Targets="Make"/>
     </Target>
+    <Target Name="MWQ_AI">
+        <MSBuild Projects="..\..\MWQ_AIPack\packages\D12\MWQ_AI.dproj"/>
+    </Target>
+    <Target Name="MWQ_AI:Clean">
+        <MSBuild Projects="..\..\MWQ_AIPack\packages\D12\MWQ_AI.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="MWQ_AI:Make">
+        <MSBuild Projects="..\..\MWQ_AIPack\packages\D12\MWQ_AI.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="MWQ_Translate;Demo1"/>
+        <CallTarget Targets="MWQ_Translate;Demo1;MWQ_AI"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="MWQ_Translate:Clean;Demo1:Clean"/>
+        <CallTarget Targets="MWQ_Translate:Clean;Demo1:Clean;MWQ_AI:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="MWQ_Translate:Make;Demo1:Make"/>
+        <CallTarget Targets="MWQ_Translate:Make;Demo1:Make;MWQ_AI:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
