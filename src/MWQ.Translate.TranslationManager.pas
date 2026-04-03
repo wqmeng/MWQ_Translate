@@ -116,7 +116,7 @@ end;
 
 function TTranslationManager.RegisterService(const AService: TTranslationService; const AApiKey: string): ITranslationService;
 begin
-  if not FServices.ContainsKey(TranslationServiceNames[AService]) then begin
+  if not FServices.TryGetValue(TranslationServiceNames[AService], Result) then begin
     case AService of
       tsMicrosoftTranslate:
         Result := TMicrosoftTranslateService.create(AApiKey);
@@ -131,8 +131,7 @@ begin
     end;
     if Result <> nil then
       FServices.Add(TranslationServiceNames[AService], Result);
-  end else
-    Result := FServices[TranslationServiceNames[AService]];
+  end;
 end;
 
 function TTranslationManager.SupportsLanguage(const Lang: string): Boolean;

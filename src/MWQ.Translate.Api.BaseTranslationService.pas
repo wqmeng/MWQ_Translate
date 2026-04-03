@@ -5,20 +5,27 @@ interface
 uses
   System.SysUtils,
   System.Generics.Collections,
-  MWQ.Translate.TranslationServiceInterface, System.Net.HttpClient;
+  MWQ.Translate.TranslationServiceInterface,
+  System.Net.HttpClient;
 
 type
-  TBaseTranslationService = class(TInterfacedObject, ITranslationService)
+  TLangDef = record
+    Name: string;
+    Codes: TArray<string>;
+    DefaultCode: string;
+  end;
 
+  TBaseTranslationService = class(TInterfacedObject, ITranslationService)
+  private
   protected
     FRetry: integer;
     FBASE_URL: string;
     FAPIKEY: string;
-    FModel: String;
+    FModel: string;
 
     FHttpClient: THttpClient;
     FTranslators: TDictionary<string, TList<string>>;
-    FLanguageNamesToCodes: TDictionary<string, string>;
+    FLanguageNamesToCodes: TDictionary<string, TArray<string>>;
     FLanguageCodesToNames: TDictionary<string, string>;
     procedure InitializeLanguageMappings; virtual;
   public
@@ -26,20 +33,33 @@ type
     destructor Destroy; override;
 
     procedure SetBaseURL(const ABaseUrl: string); virtual;
-    function Translate(const AText, ASourceLang, ADestLang: string; var ATranslated: string; const IsCode: Boolean = false): Boolean; virtual; abstract;
+    function Translate(
+        const AText, ASourceLang, ADestLang: string;
+        var ATranslated: string;
+        const IsCode: Boolean = false
+    ): Boolean; virtual; abstract;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; virtual; abstract;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; virtual; abstract;
     function GetSupportedLanguages: TDictionary<string, string>; // New method
     function SupportsLanguage(const Lang: string): Boolean;
     function LanguageNameToCode(const AName: string): string;
+    function LanguageNameToCodes(const AName: string): TArray<string>;
     function LanguageCodeToName(const ACode: string): string;
     function SupportBatchTranslations: Boolean; virtual;
-    function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string; const IsCode: Boolean = false): TArray<string>; virtual; abstract;
+    function TranslateBatch(
+        const ATexts: TArray<string>;
+        const ASourceLang, ADestLang: string;
+        const IsCode: Boolean = false
+    ): TArray<string>; virtual; abstract;
     function DelDefaultBaseTranslator: Boolean; virtual;
     procedure SetTimeOut(const AMicroSeconds: Integer); virtual;
     procedure SetRetry(const ARetry: Integer); virtual;
-    procedure SetModel(const AModel: String); virtual;
+    procedure SetModel(const AModel: string); virtual;
     function GetModel: string; virtual;
+
+    function MakeLang(const AName: string; const ACodes: Tarray<string>; const ADefault: string): TLangDef;
+    procedure AddNameCode(const AName, ACode: string; var Map: TDictionary<string, TArray<string>>);
+
     property ApiKey: string read FAPIKEY write FAPIKEY;
 
   end;
@@ -55,7 +75,7 @@ begin
   FAPIKEY := '';
   FHttpClient := THttpClient.Create;
   FTranslators := TDictionary<string, TList<string>>.Create;
-  FLanguageNamesToCodes := TDictionary<string, string>.Create;
+  FLanguageNamesToCodes := TDictionary<string, TArray<string>>.Create;
   FLanguageCodesToNames := TDictionary<string, string>.Create;
 
   InitializeLanguageMappings;
@@ -73,7 +93,7 @@ end;
 
 destructor TBaseTranslationService.Destroy;
 var
-  LKeys: TArray<String>;
+  LKeys: TArray<string>;
   I: Integer;
 begin
   FLanguageNamesToCodes.Free;
@@ -100,6 +120,33 @@ begin
   Result := FLanguageCodesToNames;
 end;
 
+function TBaseTranslationService.MakeLang(
+    const AName: string;
+    const ACodes: Tarray<string>;
+    const ADefault: string
+): TLangDef;
+begin
+  Result.Name := AName;
+  Result.Codes := ACodes;
+  Result.DefaultCode := ADefault;
+end;
+
+procedure TBaseTranslationService.AddNameCode(const AName, ACode: string; var Map: TDictionary<string, TArray<string>>);
+var
+  Arr: TArray<string>;
+begin
+  if Map.TryGetValue(AName, Arr) then begin
+    SetLength(Arr, Length(Arr) + 1);
+    Arr[High(Arr)] := ACode;
+  end
+  else begin
+    SetLength(Arr, 1);
+    Arr[0] := ACode;
+  end;
+
+  Map.AddOrSetValue(AName, Arr);
+end;
+
 procedure TBaseTranslationService.InitializeLanguageMappings;
 begin
   // Clear both
@@ -112,7 +159,8 @@ begin
   FLanguageCodesToNames.AddOrSetValue('fr', 'French');
   FLanguageCodesToNames.AddOrSetValue('de', 'German');
 
-  FLanguageCodesToNames.AddOrSetValue('zh', 'Simplified Chinese');
+  //  FLanguageCodesToNames.AddOrSetValue('zh', 'Simplified Chinese');
+  FLanguageCodesToNames.AddOrSetValue('zh', 'Chinese');
   FLanguageCodesToNames.AddOrSetValue('zh-cn', 'Simplified Chinese');
   FLanguageCodesToNames.AddOrSetValue('zh-tw', 'Traditional Chinese');
   FLanguageCodesToNames.AddOrSetValue('zh-hk', 'Hong Kong Chinese');
@@ -121,27 +169,43 @@ begin
   FLanguageCodesToNames.AddOrSetValue('ru', 'Russian');
   // Populate reverse mappings
   for var Pair in FLanguageCodesToNames do
-    FLanguageNamesToCodes.AddOrSetValue(Pair.Value, Pair.Key);
+    FLanguageNamesToCodes.AddOrSetValue(Pair.Value, [Pair.Key]);
 end;
 
 function TBaseTranslationService.LanguageNameToCode(const AName: string): string;
 var
-  Pair: TPair<string, string>;
   LName: string;
+  LCodes: TArray<string>;
 begin
   Result := '';
-  if AName = '' then Exit;
+  if AName = '' then
+    Exit;
+  LName := AName.ToLower;
+
+  if FLanguageNamesToCodes.TryGetValue(LName, LCodes) then
+    Exit(LCodes[0]); // default
+
+  // smart variants
+  if AName.Contains('traditional') then Exit('zh-hant');
+  if AName.Contains('simplified') then Exit('zh-hans');
+  if AName.Contains('us') then Exit('en-us');
+  if AName.Contains('uk') then Exit('en-gb');
+  // fallback
+end;
+
+function TBaseTranslationService.LanguageNameToCodes(const AName: string): TArray<string>;
+var
+  LName: string;
+  LCodes: TArray<string>;
+begin
+  Result := [];
+  if AName = '' then
+    Exit;
   LName := AName.ToLower;
 
   // Iterate over key-value pairs directly
-  for Pair in FLanguageNamesToCodes do
-  begin
-    if SameText(Pair.Key.ToLower, LName) then
-    begin
-      Result := Pair.Value;
-      Exit;
-    end;
-  end;
+  if FLanguageNamesToCodes.TryGetValue(LName, LCodes) then
+    Exit(LCodes);
 end;
 
 procedure TBaseTranslationService.SetBaseURL(const ABaseUrl: string);
@@ -149,7 +213,7 @@ begin
   FBASE_URL := ABaseUrl;
 end;
 
-procedure TBaseTranslationService.SetModel(const AModel: String);
+procedure TBaseTranslationService.SetModel(const AModel: string);
 begin
   FModel := AModel;
 end;
@@ -191,6 +255,8 @@ var
 begin
   if ACode = '' then
     Exit('English');
+  if FLanguageCodesToNames.TryGetValue(ACode, Result) then
+    Exit;
   Key := ACode.ToLower;
   if FLanguageCodesToNames.TryGetValue(Key, Result) then
     Exit;
@@ -198,4 +264,3 @@ begin
 end;
 
 end.
-

@@ -16,6 +16,7 @@ type
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean;
     function LanguageNameToCode(const AName: string): string;
+    function LanguageNameToCodes(const AName: string): TArray<string>;
     function LanguageCodeToName(const ACode: string): string;
     function GetSupportedLanguages: TDictionary<string, string>;
     function SupportsLanguage(const Lang: string): Boolean;

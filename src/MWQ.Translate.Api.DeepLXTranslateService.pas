@@ -74,7 +74,6 @@ var
   TranslatorUrls: TArray<string>;
   ApiKeys: TList<string>;
   SelectedTranslatorUrl: string;
-  Success: Boolean;
   I: Integer;
   LRetry: Integer;
   LSrc, LDst: String;
@@ -167,14 +166,14 @@ begin
             end;
           end;
         end;
-        if Success then
+        if Result then
           Break;
 
       end;
 
       // If all translators failed, you can handle that case here if needed
-//      if not Success then
-//        Result := TRANSLATION_FAIL_ALL_MSG;
+      if not Result then
+        ATranslated := '';
 
     finally
       SetLength(TranslatorUrls, 0);
@@ -312,4 +311,5 @@ begin
 end;
 
 end.
+
 

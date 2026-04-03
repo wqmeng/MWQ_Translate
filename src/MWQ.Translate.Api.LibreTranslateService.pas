@@ -75,7 +75,6 @@ var
   TranslatorUrls: TArray<string>;
   ApiKeys: TList<string>;
   SelectedTranslatorUrl: string;
-  Success: Boolean;
   I: Integer;
   LSrc, LDst: String;
 begin
@@ -93,8 +92,6 @@ begin
       LSrc := ASourceLang;
     LDst := ADestLang;
   end;
-
-  Success := False;
 
   LRequestBody := TStringStream.Create;
   try
