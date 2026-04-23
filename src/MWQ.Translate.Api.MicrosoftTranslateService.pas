@@ -17,7 +17,7 @@ type
     destructor Destroy; override;
 
     procedure SetBaseURL(const ABaseUrl: string); override;
-    function Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string; override;
+    function Translate(const AText, ASourceLang, ADestLang: string; var ATranslated: string; const IsCode: Boolean = false): Boolean; override;
     function AddTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function DelTranslator(const ATransApiUrl, AApiKey: string): Boolean; override;
     function TranslateBatch(const ATexts: TArray<string>; const ASourceLang, ADestLang: string; const IsCode: Boolean = false): TArray<string>; override;
@@ -64,7 +64,7 @@ begin
   inherited;
 end;
 
-function TMicrosoftTranslateService.Translate(const AText, ASourceLang, ADestLang: string; const IsCode: Boolean = false): string;
+function TMicrosoftTranslateService.Translate(const AText, ASourceLang, ADestLang: string; var ATranslated: string; const IsCode: Boolean = false): Boolean;
 var
   LResponse: IHTTPResponse;
   LRequestBody: TStringStream;
@@ -72,7 +72,7 @@ var
   LTranslation: TJSONObject;
   LSrc, LDst: String;
 begin
-  Result := '';
+  Result := false;
   if ADestLang = '' then
     Exit;
 
@@ -118,7 +118,8 @@ begin
           if LResult.Count > 0 then begin
             // Access the translations array
             LTranslation := LResult.Items[0].GetValue<TJSONArray>('translations').Items[0] as TJSONObject;
-            Result := LTranslation.GetValue<string>('text');
+            ATranslated := LTranslation.GetValue<string>('text');
+            Result := true;
           end;
         finally
           LResult.Free;
