@@ -38,11 +38,16 @@ type
     rbDeepLX: TRadioButton;
     lblSrc: TLabel;
     lblDest: TLabel;
+    rbLmstudio: TRadioButton;
+    cbbPort: TComboBox;
+    lblPort: TLabel;
+    rbLlamaCpp: TRadioButton;
     procedure btnOllamaClick(Sender: TObject);
     procedure btnLibreClick(Sender: TObject);
     procedure cbbModelChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure rbLibreChange(Sender: TObject);
+    procedure rbLmstudioChange(Sender: TObject);
     procedure rbOllamaChange(Sender: TObject);
   private
     { Private declarations }
@@ -60,12 +65,14 @@ uses
   MWQ.Translate.Types,
   MWQ.Ollama.Manager,
   System.Generics.Collections,
-  System.StrUtils;
+  System.StrUtils,
+  MWQ.Translate.Api.LLMTranslateService,
+  MWQ.LLM.Manager;
 {$R *.fmx}
 
 procedure TForm13.btnOllamaClick(Sender: TObject);
 var
-  LibreService, LDeepLXService, LOllamaService: ITranslationService;
+  LibreService, LDeepLXService, LLLMService: ITranslationService;
 //  TranslatedText: string;
 //  SubscriptionKey: string;
   LSrc, LDest: string;
@@ -73,12 +80,17 @@ begin
   try
     if rbOllama.IsChecked then begin
       mmoResult.Text := '';
-      LOllamaService := FTranslationManager.RegisterService(TTranslationService.tsOllamaTranslate, '');
+//      LOllamaService := FTranslationManager.RegisterService(TTranslationService.tsOllamaTranslate, '');
+
+      LLLMService := FTranslationManager.RegisterService(TTranslationService.tsLLMTranslate, '');
+      TLLMService(LLLMService).SetProvider('');
+      TLLMService(LLLMService).SetBaseURL('');
+      TLLMService(LLLMService).SetModel('');
 
       LSrc := cbbSrcLang.ListItems[cbbSrcLang.ItemIndex].TagString;
       LDest := cbbDstLang.ListItems[cbbDstLang.ItemIndex].TagString;
 
-      if LOllamaService <> nil then begin
+      if LLLMService <> nil then begin
         TTask.Run(
             procedure
             var
@@ -256,6 +268,17 @@ procedure TForm13.rbLibreChange(Sender: TObject);
 begin
   btnLibre.Enabled := rbLibre.IsChecked;
   btnOllama.Enabled := not rbLibre.IsChecked;
+end;
+
+procedure TForm13.rbLmstudioChange(Sender: TObject);
+begin
+  cbbModel.Clear;
+  TLLMManager.Init('http://localhost:1234/');
+  cbbModel.Items.AddStrings(TLLMManager.GetModelsList);
+  if cbbModel.Count > 0 then
+    cbbModel.ItemIndex := 0;
+
+  btnLibre.Enabled := not rbOllama.IsChecked;
 end;
 
 procedure TForm13.rbOllamaChange(Sender: TObject);

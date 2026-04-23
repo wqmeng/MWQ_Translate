@@ -3,7 +3,7 @@ unit MWQ.Translate.Types;
 interface
 
 type
-  TTranslationService = (tsMicrosoftTranslate, tsGoogleTranslate, tsAmazonTranslate, tsLibreTranslate, tsDeepLXTranslate, tsOllamaTranslate);
+  TTranslationService = (tsMicrosoftTranslate, tsGoogleTranslate, tsAmazonTranslate, tsLibreTranslate, tsDeepLXTranslate, tsOllamaTranslate, tsLLMTranslate);
 
 const
   TranslationServiceNames: array[TTranslationService] of string = (
@@ -12,7 +12,8 @@ const
     'AmazonTranslate',
     'LibreTranslate',
     'DeepLX',
-    'Ollama'
+    'Ollama',
+    'LLM'
   );
 
 implementation
