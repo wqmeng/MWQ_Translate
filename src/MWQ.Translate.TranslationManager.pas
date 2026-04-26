@@ -7,12 +7,14 @@ uses
   System.Generics.Collections,
   MWQ.Translate.TranslationServiceInterface,
   System.Classes,
-  MWQ.Translate.Types;
+  MWQ.Translate.Types,
+  MWQ.LLM.Manager;
 
 type
   TTranslationManager = class
   private
     FServices: TDictionary<string, ITranslationService>;
+    FLLMManager: TLLMManager;
   public
     constructor Create;
     destructor Destroy; override;
@@ -125,7 +127,11 @@ begin
       tsLibreTranslate: Result := TLibreTranslateService.create;
       tsDeepLXTranslate: Result := TDeepLXService.create;
       tsOllamaTranslate: Result := TOllamaService.create;
-      tsLLMTranslate: Result := TLLMService.create;
+      tsLLMTranslate: begin
+        if not Assigned(FLLMManager) then
+          FLLMManager := TLLMManager.Create;
+        Result := TLLMService.Create(FLLMManager);
+      end;
     end;
     if Result <> nil then
       FServices.Add(TranslationServiceNames[AService], Result);

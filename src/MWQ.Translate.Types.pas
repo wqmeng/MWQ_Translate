@@ -4,6 +4,11 @@ interface
 
 type
   TTranslationService = (tsMicrosoftTranslate, tsGoogleTranslate, tsAmazonTranslate, tsLibreTranslate, tsDeepLXTranslate, tsOllamaTranslate, tsLLMTranslate);
+  TLangDef = record
+    Name: string;
+    Codes: TArray<string>;
+    DefaultCode: string;
+  end;
 
 const
   TranslationServiceNames: array[TTranslationService] of string = (

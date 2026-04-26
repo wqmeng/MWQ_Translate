@@ -12,7 +12,8 @@ uses
   MWQ.Translate.TranslationServiceInterface,
   MWQ.Translate.Api.BaseTranslationService,
   MWQ.Ollama.Types,
-  MWQ.Ollama.PromptBuilder;
+  MWQ.Ollama.PromptBuilder,
+  MWQ.Translate.Types;
 
 type
   /// Simple pair type for passing messages: Role -> Content

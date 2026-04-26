@@ -6,23 +6,18 @@ uses
   System.SysUtils,
   System.Generics.Collections,
   MWQ.Translate.TranslationServiceInterface,
-  System.Net.HttpClient;
+  System.Net.HttpClient,
+  MWQ.Translate.Types,
+  MWQ.LLM.Types;
 
 type
-  TLangDef = record
-    Name: string;
-    Codes: TArray<string>;
-    DefaultCode: string;
-  end;
-
   TBaseTranslationService = class(TInterfacedObject, ITranslationService)
-  private
   protected
     FRetry: integer;
     FBASE_URL: string;
     FAPIKEY: string;
     FModel: string;
-
+    FModelInfo: TLLMModelInfo;
     FHttpClient: THttpClient;
     FTranslators: TDictionary<string, TList<string>>;
     FLanguageNamesToCodes: TDictionary<string, TArray<string>>;
