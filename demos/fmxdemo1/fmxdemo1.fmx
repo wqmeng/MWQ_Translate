@@ -150,6 +150,7 @@ object Form13: TForm13
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 3
+    Visible = False
     OnChange = cbbModelChange
   end
   object lblPort: TLabel
@@ -162,6 +163,7 @@ object Form13: TForm13
     TabOrder = 16
   end
   object rbLlamaCpp: TRadioButton
+    Enabled = False
     GroupName = 'tr'
     Position.X = 190.000000000000000000
     Position.Y = 8.000000000000000000
@@ -170,6 +172,5 @@ object Form13: TForm13
     Size.PlatformDefault = False
     TabOrder = 13
     Text = 'LLamaCpp'
-    OnChange = rbLmstudioChange
   end
 end

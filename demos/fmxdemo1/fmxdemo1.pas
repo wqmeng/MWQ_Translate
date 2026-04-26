@@ -1,4 +1,4 @@
-unit fmxdemo1;
+ï»¿unit fmxdemo1;
 
 interface
 
@@ -73,24 +73,36 @@ uses
 procedure TForm13.btnOllamaClick(Sender: TObject);
 var
   LibreService, LDeepLXService, LLLMService: ITranslationService;
-//  TranslatedText: string;
-//  SubscriptionKey: string;
+  //  TranslatedText: string;
+  //  SubscriptionKey: string;
   LSrc, LDest: string;
 begin
   try
-    if rbOllama.IsChecked then begin
+    if (rbOllama.IsChecked or rbLmStudio.IsChecked) then begin
       mmoResult.Text := '';
-//      LOllamaService := FTranslationManager.RegisterService(TTranslationService.tsOllamaTranslate, '');
+      //      LOllamaService := FTranslationManager.RegisterService(TTranslationService.tsOllamaTranslate, '');
 
-      LLLMService := FTranslationManager.RegisterService(TTranslationService.tsLLMTranslate, '');
-      TLLMService(LLLMService).SetProvider('');
-      TLLMService(LLLMService).SetBaseURL('');
-      TLLMService(LLLMService).SetModel('');
-
-      LSrc := cbbSrcLang.ListItems[cbbSrcLang.ItemIndex].TagString;
-      LDest := cbbDstLang.ListItems[cbbDstLang.ItemIndex].TagString;
+      //      LLLMService := FTranslationManager.RegisterService(TTranslationService.tsLLMTranslate, 'llm');
+      LLLMService := FTranslationManager.GetTranslateService(TranslationServiceNames[tsLLMTranslate]);
 
       if LLLMService <> nil then begin
+        if rbOllama.IsChecked then begin
+          TLLMService(LLLMService).SetProvider('ollama');
+//          TLLMService(LLLMService).SetBaseURL('http://localhost:11434');
+        end
+        else if rbLmStudio.IsChecked then begin
+          TLLMService(LLLMService).SetProvider('lmstudio');
+//          TLLMService(LLLMService).LLMManager.SetRateLimit(3);
+//          TLLMService(LLLMService).SetBaseURL('http://localhost:1234');
+        end;
+
+        if (cbbSrcLang.ItemIndex < 0) or (cbbDstLang.ItemIndex < 0) then begin
+          mmoResult.Text := 'Please select source and destination languages';
+          Exit;
+        end;
+
+        LSrc := cbbSrcLang.ListItems[cbbSrcLang.ItemIndex].TagString;
+        LDest := cbbDstLang.ListItems[cbbDstLang.ItemIndex].TagString;
         TTask.Run(
             procedure
             var
@@ -99,7 +111,7 @@ begin
               LStr := edtSrc.Text;
               LStr :=
                   FTranslationManager.TranslateByCode(
-                      TranslationServiceNames[TTranslationService.tsOllamaTranslate],
+                      TranslationServiceNames[TTranslationService.tsLLMTranslate],
                       LStr,
                       LSrc,
                       LDest
@@ -174,7 +186,7 @@ begin
   if Result <> 0 then
     Exit;
 
-  // 2. same base ¡ú shorter code first (Google-like behavior)
+  // 2. same base ï¿½ï¿½ shorter code first (Google-like behavior)
   LDash := Length(L);
   RDash := Length(R);
 
@@ -187,7 +199,7 @@ end;
 
 procedure TForm13.cbbModelChange(Sender: TObject);
 var
-  LOllamaService: ITranslationService;
+  LLlmService: ITranslationService;
   LCodesToNames: TDictionary<string, string>;
   Pair: TPair<string, string>;
   LName: string;
@@ -195,11 +207,11 @@ var
   I: Integer;
   Len, Lzh: Integer;
 begin
-  if rbOllama.IsChecked then begin
+  if (rbOllama.IsChecked or rbLmstudio.IsChecked) then begin
     mmoResult.Text := '';
 
-    LOllamaService := FTranslationManager.RegisterService(TTranslationService.tsOllamaTranslate, '');
-
+    //     LOllamaService := FTranslationManager.RegisterService(TTranslationService.tsOllamaTranslate, '');
+    LLlmService := FTranslationManager.GetTranslateService(TranslationServiceNames[tsLLMTranslate]);
     if not (cbbModel.Text.StartsWith('llama', True) or cbbModel.Text.StartsWith('translategemma', True)) then begin
       mmoResult.Text := 'Unsupported model, please install TranslateGemma or Llama';
       btnOllama.Enabled := false;
@@ -208,14 +220,19 @@ begin
 
     btnOllama.Enabled := true;
 
-    if LOllamaService.GetModel <> cbbModel.Text then
-      LOllamaService.SetModel(cbbModel.Text);
+    //    if LOllamaService.GetModel <> cbbModel.Text then
+    //      LOllamaService.SetModel(cbbModel.Text);
+
+    if LLlmService.GetModel <> cbbModel.Text then
+      LLlmService.SetModel(cbbModel.Text);
 
     // --- reset UI ---
     cbbSrcLang.Clear;
     cbbDstLang.Clear;
 
-    LCodesToNames := LOllamaService.GetSupportedLanguages;
+    //    LCodesToNames := LOllamaService.GetSupportedLanguages;
+    LCodesToNames := LLlmService.GetSupportedLanguages;
+
     if (LCodesToNames = nil) or (LCodesToNames.Count = 0) then
       Exit;
 
@@ -271,10 +288,16 @@ begin
 end;
 
 procedure TForm13.rbLmstudioChange(Sender: TObject);
+var
+  LLLMService: ITranslationService;
 begin
   cbbModel.Clear;
-  TLLMManager.Init('http://localhost:1234/');
-  cbbModel.Items.AddStrings(TLLMManager.GetModelsList);
+
+  LLLMService := FTranslationManager.RegisterService(TTranslationService.tsLLMTranslate, 'lmstudio');
+  TLLMService(LLLMService).SetProvider('lmstudio');
+
+  LLLMService := FTranslationManager.GetTranslateService(TranslationServiceNames[tsLLMTranslate]);
+  cbbModel.Items.AddStrings(TLLMService(LLLMService).GetModels);
   if cbbModel.Count > 0 then
     cbbModel.ItemIndex := 0;
 
@@ -282,9 +305,17 @@ begin
 end;
 
 procedure TForm13.rbOllamaChange(Sender: TObject);
+var
+  LLLMService: ITranslationService;
 begin
   cbbModel.Clear;
-  cbbModel.Items.AddStrings(TOllamaManager.GetModelsList);
+//  cbbModel.Items.AddStrings(TOllamaManager.GetModelsList);
+
+  LLLMService := FTranslationManager.RegisterService(TTranslationService.tsLLMTranslate, 'ollama');
+  TLLMService(LLLMService).SetProvider('ollama');
+
+  cbbModel.Items.AddStrings(TLLMService(LLLMService).GetModels);
+
   if cbbModel.Count > 0 then
     cbbModel.ItemIndex := 0;
 
