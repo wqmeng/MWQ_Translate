@@ -17,7 +17,6 @@ object Form13: TForm13
     Size.PlatformDefault = False
     TabOrder = 1
     Text = 'Translate (Ollama)'
-    TextSettings.Trimming = None
     OnClick = btnOllamaClick
   end
   object btnLibre: TButton
@@ -28,7 +27,6 @@ object Form13: TForm13
     Size.PlatformDefault = False
     TabOrder = 2
     Text = 'Translate (Libre)'
-    TextSettings.Trimming = None
     OnClick = btnLibreClick
   end
   object cbbModel: TComboBox

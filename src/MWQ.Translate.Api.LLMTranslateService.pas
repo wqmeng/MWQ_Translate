@@ -77,6 +77,8 @@ end;
 destructor TLLMService.Destroy;
 begin
   FProvider := nil;
+  FLLMManager := nil;
+  inherited;
 end;
 
 function TLLMService.GetModels: TArray<string>;

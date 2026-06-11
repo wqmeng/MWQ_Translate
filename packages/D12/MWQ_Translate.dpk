@@ -40,7 +40,6 @@ contains
   MWQ.Translate.Types in '..\..\src\MWQ.Translate.Types.pas',
   MWQ.Translate.Api.BaseTranslationService in '..\..\src\MWQ.Translate.Api.BaseTranslationService.pas',
   MWQ.Translate.Api.DeepLXTranslateService in '..\..\src\MWQ.Translate.Api.DeepLXTranslateService.pas',
-  MWQ.Translate.Api.OllamaLocalTranslateService in '..\..\src\MWQ.Translate.Api.OllamaLocalTranslateService.pas',
   MWQ.Translate.Api.LLMTranslateService in '..\..\src\MWQ.Translate.Api.LLMTranslateService.pas';
 
 end.

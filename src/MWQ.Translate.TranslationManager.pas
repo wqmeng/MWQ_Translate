@@ -38,7 +38,6 @@ uses
   MWQ.Translate.Api.LibreTranslateService,
   MWQ.Translate.Api.DeepLXTranslateService,
   MwQ.Translate.Api.MicrosoftTranslateService,
-  MWQ.Translate.Api.OllamaLocalTranslateService,
   MWQ.Translate.Api.LLMTranslateService;
 
 { TTranslationManager }
@@ -49,8 +48,28 @@ begin
 end;
 
 destructor TTranslationManager.Destroy;
+var
+  LServices: TArray<string>;
+  LService: string;
+  I: Integer;
+  LTran: TPair<string, ITranslationService>;
 begin
+  if FServices.Count > 0 then begin
+    LServices := FServices.Keys.ToArray;
+
+    for I := Low(LServices) to High(LServices) do begin
+      LService := LServices[I];
+      if LService <> '' then begin
+        LTran := FServices.ExtractPair(LService);
+        LTran.Value := nil;
+      end;
+    end;
+  end;
+
+  FServices.Clear;
   FServices.Free;
+  if Assigned(FLLMManager) then
+    FreeAndNil(FLLMManager);
   inherited;
 end;
 
@@ -126,7 +145,7 @@ begin
         raise Exception.Create('Not implement. ' + TranslationServiceNames[AService]);
       tsLibreTranslate: Result := TLibreTranslateService.create;
       tsDeepLXTranslate: Result := TDeepLXService.create;
-      tsOllamaTranslate: Result := TOllamaService.create;
+//      tsOllamaTranslate: Result := TOllamaService.create;
       tsLLMTranslate: begin
         if not Assigned(FLLMManager) then
           FLLMManager := TLLMManager.Create;

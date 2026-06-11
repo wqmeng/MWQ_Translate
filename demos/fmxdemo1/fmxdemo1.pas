@@ -63,7 +63,6 @@ implementation
 uses
   MWQ.Translate.TranslationServiceInterface,
   MWQ.Translate.Types,
-  MWQ.Ollama.Manager,
   System.Generics.Collections,
   System.StrUtils,
   MWQ.Translate.Api.LLMTranslateService,
@@ -212,7 +211,7 @@ begin
 
     //     LOllamaService := FTranslationManager.RegisterService(TTranslationService.tsOllamaTranslate, '');
     LLlmService := FTranslationManager.GetTranslateService(TranslationServiceNames[tsLLMTranslate]);
-    if not (cbbModel.Text.StartsWith('llama', True) or cbbModel.Text.StartsWith('translategemma', True)) then begin
+    if not (cbbModel.Text.StartsWith('llama', True) or cbbModel.Text.StartsWith('translategemma', True) or cbbModel.Text.Contains('gemma', True)) then begin
       mmoResult.Text := 'Unsupported model, please install TranslateGemma or Llama';
       btnOllama.Enabled := false;
       Exit;
